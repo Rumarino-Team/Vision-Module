@@ -14,4 +14,4 @@ target_link_libraries(${PROJECT_NAME}
                         ${ZED_LIBRARIES}
                         ${SPECIAL_OS_LIBS}
                         ${OpenCV_LIBS}
-                        ${CUDA_LIBRARIES} ${CUDA_npps_LIBRARY} ${CUDA_nppi_LIBRARY} )
+                        ${CUDA_LIBRARIES} ${CUDA_npps_LIBRARY})
