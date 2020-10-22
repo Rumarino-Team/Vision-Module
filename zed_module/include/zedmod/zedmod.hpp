@@ -11,10 +11,11 @@ struct Video_Frame {
 
 class ZED_Camera {
     private:
-        Camera zed;
+        sl::Camera zed;
+        bool recording;
     public:
-        ZED_Camera(bool record); //Inits zed, has ability to record
+        ZED_Camera(bool record, const char* playback_video, const char* recording_out, sl::RESOLUTION res, int fps);
         Video_Frame update(); //Gets new frame
-        char* close(); //Closes camera object and returns save path if recording
+        void close(); //Closes camera object
 };
 #endif
