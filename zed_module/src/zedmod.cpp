@@ -117,6 +117,7 @@ Video_Frame ZED_Camera::update() {
     else if (zed.grab() == sl::ERROR_CODE::END_OF_SVOFILE_REACHED) {
         std::cout << "SVO end has been reached. Looping back to first frame" << std::endl;
         zed.setSVOPosition(0);
+        new_frame = this->update(); // Avoid returning an empty object
     }
 
     return new_frame;
