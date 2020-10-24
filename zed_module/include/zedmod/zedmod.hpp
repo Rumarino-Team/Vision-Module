@@ -14,7 +14,7 @@ class ZED_Camera {
         sl::Camera zed;
         bool recording;
     public:
-        ZED_Camera(bool record, const char* playback_video, const char* recording_out, sl::RESOLUTION res, int fps);
+        ZED_Camera(bool record, const char* playback_video, const char* recording_out = "recording_out.svo", sl::RESOLUTION res = sl::RESOLUTION::HD1080, int fps = 30);
         Video_Frame update(); //Gets new frame
         void close(); //Closes camera object
 };

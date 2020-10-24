@@ -56,7 +56,7 @@ const char* ErrorToString(sl::ERROR_CODE error) {
     }
 }
 
-ZED_Camera::ZED_Camera(bool record, const char* playback_video, const char* recording_out = "recording_out.svo", sl::RESOLUTION res = sl::RESOLUTION::HD1080, int fps = 30) {
+ZED_Camera::ZED_Camera(bool record, const char* playback_video, const char* recording_out, sl::RESOLUTION res, int fps) {
     zed = sl::Camera();
 
     // Conf params
