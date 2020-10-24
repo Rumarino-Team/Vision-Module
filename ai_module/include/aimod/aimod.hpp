@@ -2,9 +2,26 @@
 #define __AI_MODULE__
 #include <DarkHelp.hpp>
 #include <opencv2/opencv.hpp>
-struct Object { //Built from DarkHelp::PredictionResult
+#include "zedmod/zedmod.hpp"
+struct DetectedObject { //Built from DarkHelp::PredictionResult
     cv::Rect bounding_box;
     int obj_id;
     float distance;
+};
+
+class AI {
+    private:
+        bool recording;
+        std::string in_path;
+        std::string out_path;
+        std::string dir_name;
+        std::string cfg;
+        std::string weights;
+        std::string names;
+        int save_count;
+    public:
+        AI(bool record, std::string input_path, std::string output_path); //Loads Darkhelp
+        DetectedObject detect(Video_Frame frame); //Detects object within a frame
+        void close(); //Closes AI
 };
 #endif
