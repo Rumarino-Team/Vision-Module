@@ -9,12 +9,15 @@ struct Video_Frame {
     cv::Mat depth_map; //sl::Mat -> cv::Mat will contain 32bit floats
 };
 
+const std::string empty = std::string();
+
 class ZED_Camera {
     private:
         sl::Camera zed;
         bool recording;
     public:
-        ZED_Camera(bool record, const char* playback_video, const char* recording_out = "recording_out.svo", sl::RESOLUTION res = sl::RESOLUTION::HD1080, int fps = 30);
+        ZED_Camera(bool record, const std::string &playback_video = empty, const std::string &recording_out = empty, sl::RESOLUTION res = sl::RESOLUTION::HD1080, int fps = 30);
+        ~ZED_Camera();
         Video_Frame update(); //Gets new frame
         void close(); //Closes camera object
 };
