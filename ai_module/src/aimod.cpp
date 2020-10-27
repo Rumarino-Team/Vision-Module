@@ -19,7 +19,7 @@ AI::AI(bool record, std::string input_path, std::string output_path) {
     std::string intermediate;
     //Tokenizing w.r.t. slash '/'
     while(getline(charToString, intermediate, '/'))
-        if(intermediate != "" && intermediate != " ")
+        if(!intermediate.empty() && intermediate != " ")
             tokens.push_back(intermediate);
     //The Folder Name should be the last token
     dir_name = tokens.back();
@@ -37,13 +37,18 @@ DetectedObject AI::detect(Video_Frame frame) {
     //Load Darkhelp < darkhelp(config file, weights file, .names file)
     DarkHelp darkhelp(cfg, weights, names);
 
-    //Predict items on the frame
+    //Predict items from the frame
     DarkHelp::PredictionResults prediction = darkhelp.predict(frame.image);
     result.bounding_box = prediction.at(0).rect;
     result.obj_id = prediction.at(0).best_class;
+    result.obj_name = (prediction.at(0).name).c_str();
 
     //TODO: logic to get distance
     //get mid point from bounding_box and get float32 from the depth image
+    cv::Point2f mid_point = prediction.at(0).original_point;
+
+    //TODO: figure out what the line below returns and how to work with it
+    //frame.depth_map.at<cv::float16_t>(mid_point);
 
     if(recording){
         cv::Mat annotated_img = darkhelp.annotate();
@@ -57,9 +62,3 @@ DetectedObject AI::detect(Video_Frame frame) {
 void AI::close() {
 
 }
-
-/*
- * TODO: also si puedes, cambia el struct pa que tenga algo como
- *  const char* obj_name o algo asi y que sea igual a
- *  std::string DarkHelp::PredictionResult:name
- */

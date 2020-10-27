@@ -6,6 +6,7 @@
 struct DetectedObject { //Built from DarkHelp::PredictionResult
     cv::Rect bounding_box;
     int obj_id;
+    const char* obj_name;
     float distance;
 };
 
