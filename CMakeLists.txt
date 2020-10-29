@@ -3,6 +3,7 @@
 cmake_minimum_required (VERSION 3.5)
 
 project(vision)
+enable_testing()
 
 # Variables scopes follow standard rules
 # Variables defined here will carry over to its children, ergo subdirectories
@@ -32,6 +33,7 @@ SET(SPECIAL_OS_LIBS "pthread")
 add_definitions(-std=c++14 -g -O3)
 
 # Add sub directories
+add_subdirectory(test)
 add_subdirectory(zed_module)
 add_subdirectory(ai_module)
 add_subdirectory(api_module)
