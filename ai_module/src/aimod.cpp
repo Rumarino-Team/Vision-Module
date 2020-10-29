@@ -25,9 +25,9 @@ AI::AI(bool record, std::string input_path, std::string output_path) {
     dir_name = tokens.back();
 
     //Set path for each necessary file
-    cfg = input_path + dir_name + ".cfg";
-    weights = input_path + "weights/" + dir_name + "_best.weights";
-    names = input_path + "custom.names";
+    cfg = input_path + + "/" + dir_name + ".cfg";
+    weights = input_path + "/weights/" + dir_name + "_best.weights";
+    names = input_path + "/custom.names";
 }
 
 DetectedObject AI::detect(Video_Frame frame) {
@@ -43,22 +43,26 @@ DetectedObject AI::detect(Video_Frame frame) {
     result.obj_id = prediction.at(0).best_class;
     result.obj_name = (prediction.at(0).name).c_str();
 
-    //TODO: logic to get distance
-    //get mid point from bounding_box and get float32 from the depth image
+    //Get mid point from of the predicted image and get the distance from the depth image
+    //Float taken from depth map is distance in millimeters (mm)
     cv::Point2f mid_point = prediction.at(0).original_point;
-
-    //TODO: figure out what the line below returns and how to work with it
-    //frame.depth_map.at<cv::float16_t>(mid_point);
+    result.distance = frame.depth_map.at<float>(mid_point);
 
     if(recording){
+        //TODO: change to runtime recording with CV VideoCapture
+        //https://stackoverflow.com/questions/22765397/create-video-from-images-using-videocapture-opencv
         cv::Mat annotated_img = darkhelp.annotate();
-        cv::imwrite(out_path+"frameNum"+std::to_string(save_count)+".png", annotated_img, {cv::IMWRITE_PNG_COMPRESSION, 9});
+        cv::imwrite(out_path+"/frameNum"+std::to_string(save_count)+".png", annotated_img, {cv::IMWRITE_PNG_COMPRESSION, 9});
         save_count++;
     }
 
     return result;
 }
 
-void AI::close() {
-
+std::string AI::close() {
+    if(recording){
+        //TODO: close CV VideoCapture and return path
+    }
+    else
+        return "Closing AI. No CV Video was generated.";
 }

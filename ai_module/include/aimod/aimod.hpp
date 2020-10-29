@@ -23,6 +23,6 @@ class AI {
     public:
         AI(bool record, std::string input_path, std::string output_path); //Loads Darkhelp
         DetectedObject detect(Video_Frame frame); //Detects object within a frame
-        void close(); //Closes AI
+        std::string close(); //Closes AI, if recording, loads a CV video
 };
 #endif
