@@ -171,3 +171,50 @@ void ZED_Camera::close() {
     zed.close();
     zed.~Camera();
 }
+
+void svo2img(const std::string &playback_video, const std::string &image_save_path) {
+    sl::Camera zed;
+
+    // Conf params
+    sl::InitParameters init_params;
+    init_params.sdk_verbose = true; // Use for the debug flag.
+
+    init_params.input.setFromSVOFile(playback_video.c_str());
+    init_params.svo_real_time_mode = false; // This will prevent the video to play realtime
+
+    // Check if it opens, it not print error
+    try {
+        sl::ERROR_CODE err = zed.open(init_params);
+        if (err != sl::ERROR_CODE::SUCCESS) {
+            throw err;
+        }
+    }
+    catch (sl::ERROR_CODE error) {
+        std::cout << "An exception occurred." << ErrorToString(error) << '\n';
+    }
+    int img_count = 0;
+    while (true) {
+        img_count++;
+        if (zed.grab() == sl::ERROR_CODE::SUCCESS) {
+            // Get and convert the image file
+            sl::Mat left_image;
+            zed.retrieveImage(left_image, sl::VIEW::LEFT);
+            cv::Mat image = zedMat2cvMat(left_image);
+
+            // Support for writing JPG
+            std::vector<int> compression_params;
+            compression_params.push_back( cv::IMWRITE_JPEG_QUALITY );
+            compression_params.push_back( 100 );
+
+            // Save the image file
+            std::string img_path = image_save_path+"/image"+std::to_string(img_count)+".jpg";
+            std::cout << "Saved frame " << img_count << " as " << img_path << std::endl;
+            cv::imwrite(img_path, image, compression_params);
+        }
+        else if (zed.grab() == sl::ERROR_CODE::END_OF_SVOFILE_REACHED) {
+            // When video ends, stop
+            break;
+        }
+    }
+    zed.close();
+}
