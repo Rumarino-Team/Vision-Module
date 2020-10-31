@@ -12,7 +12,7 @@ bool file_exists(const char* file) {
 std::string playback_video("media/test_input_video.svo");
 
 TEST(ZED, Run_Video) {
-    ZED_Camera cam(false, playback_video);
+    ZED_Camera cam(playback_video);
     int exec_time = 0;
     for (int i=0; i < 30; i++) {
         auto start = std::chrono::high_resolution_clock::now();
@@ -30,7 +30,7 @@ TEST(ZED, Run_Video) {
 }
 
 std::string video_save("media/recording_out.svo");
-ZED_Camera cam(true, "", video_save);
+ZED_Camera cam(true, video_save, Video_Quality::HD1080_30fps);
 
 TEST(ZED, Live_video) {
     int exec_time = 0;
