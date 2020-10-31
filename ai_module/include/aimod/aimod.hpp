@@ -7,7 +7,6 @@ struct DetectedObject { //Built from DarkHelp::PredictionResult
     cv::Rect bounding_box;
     int obj_id;
     const char* obj_name;
-    cv::Point3d location;
     float distance;
 };
 
@@ -17,13 +16,13 @@ class AI {
         std::string in_path;
         std::string out_path;
         std::string dir_name;
-        std::string cfg;
-        std::string weights;
-        std::string names;
         int save_count;
-    public:
+        cv::VideoWriter out_vid;
+        DarkHelp darkhelp;
+public:
         AI(bool record, std::string input_path, std::string output_path); //Loads Darkhelp
+        ~AI(); //Destruct AI object
         std::vector<DetectedObject> detect(Video_Frame frame, float confidence); //Detects object within a frame
-        void close(); //Closes AI, if recording, loads a CV video
+        std::string close(); //Closes AI, if recording, loads a CV video
 };
 #endif
