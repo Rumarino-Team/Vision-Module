@@ -7,6 +7,7 @@ struct Video_Frame {
     //We want to use the cv::Mat to further avoid using ZED outside this module
     cv::Mat image;
     cv::Mat depth_map; //sl::Mat -> cv::Mat will contain 32bit floats
+    cv::Mat point_cloud; //Each pixel contains [x,y,z,NULL]
 };
 
 const std::string empty = std::string();

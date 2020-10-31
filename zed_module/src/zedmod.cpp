@@ -103,14 +103,16 @@ ZED_Camera::~ZED_Camera() { this->close(); }
 
 Video_Frame ZED_Camera::update() {
     Video_Frame new_frame;
-    sl::Mat left_image, depth_map;
+    sl::Mat left_image, depth_map, point_cloud;
     if (zed.grab() == sl::ERROR_CODE::SUCCESS) {
         // Since the following functions just copy over to the given variable
         // We must first initialize a sl::Mat to then convert over to  cv::Mat
         zed.retrieveImage(left_image, sl::VIEW::LEFT);
         zed.retrieveMeasure(depth_map, sl::MEASURE::DEPTH);
+        zed.retrieveMeasure(point_cloud, sl::MEASURE::XYZ);
         new_frame.image = zedMat2cvMat(left_image);
         new_frame.depth_map = zedMat2cvMat(depth_map);
+        new_frame.point_cloud = zedMat2cvMat(point_cloud);
     }
     else if (zed.grab() == sl::ERROR_CODE::END_OF_SVOFILE_REACHED) {
         std::cout << "SVO end has been reached. Looping back to first frame" << std::endl;
