@@ -13,7 +13,6 @@ struct DetectedObject { //Built from DarkHelp::PredictionResult
 class AI {
     private:
         bool recording;
-        std::string in_path;
         std::string out_path;
         std::string dir_name;
         int save_count;
