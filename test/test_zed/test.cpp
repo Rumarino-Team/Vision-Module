@@ -53,6 +53,10 @@ TEST(ZED, Save_Video) {
     EXPECT_TRUE(file_exists(video_save.c_str()));
 }
 
+TEST(ZED, Save_Images) {
+    svo2img(playback_video, "media/");
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

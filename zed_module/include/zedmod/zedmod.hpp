@@ -95,4 +95,12 @@ class ZED_Camera {
          */
         void close();
 };
+
+/**
+ * Turns the given svo video into a collection of images.
+ *
+ * @param playback_video The video to be played back
+ * @param image_save_path Where the stripped images will be stored
+ */
+void svo2img(const std::string &playback_video, const std::string &image_save_path);
 #endif
