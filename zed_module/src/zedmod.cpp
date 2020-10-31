@@ -69,7 +69,35 @@ const char* ErrorToString(sl::ERROR_CODE error) {
     }
 }
 
-ZED_Camera::ZED_Camera(bool record, const std::string &playback_video, const std::string &recording_out, sl::RESOLUTION res, int fps) {
+ZED_Camera::ZED_Camera(bool record, const std::string &recording_out, Video_Quality quality) {
+    sl::RESOLUTION res;
+    int fps;
+
+    switch (quality) {
+        case Video_Quality::HD2K_15fps: res = sl::RESOLUTION::HD2K; fps=15; break;
+        case Video_Quality::HD1080_15fps: res = sl::RESOLUTION::HD1080; fps=15; break;
+        case Video_Quality::HD1080_30fps: res = sl::RESOLUTION::HD1080; fps=30; break;
+        case Video_Quality::HD720_15fps: res = sl::RESOLUTION::HD720; fps=15; break;
+        case Video_Quality::HD720_30fps: res = sl::RESOLUTION::HD720; fps=30; break;
+        case Video_Quality::HD720_60fps: res = sl::RESOLUTION::HD720; fps=60; break;
+        case Video_Quality::VGA_15fps: res = sl::RESOLUTION::VGA; fps=15; break;
+        case Video_Quality::VGA_30fps: res = sl::RESOLUTION::VGA; fps=30; break;
+        case Video_Quality::VGA_60fps: res = sl::RESOLUTION::VGA; fps=60; break;
+        case Video_Quality::VGA_100fps: res = sl::RESOLUTION::VGA; fps=100; break;
+    }
+
+    this->init(record, std::string(), recording_out, res, fps);
+}
+
+ZED_Camera::ZED_Camera(bool record, sl::RESOLUTION res, int fps, const std::string &recording_out) {
+    this->init(record, std::string(), recording_out, res, fps);
+}
+
+ZED_Camera::ZED_Camera(const std::string &playback_video) {
+    this->init(false, playback_video, std::string(), sl::RESOLUTION::HD1080, 30);
+}
+
+void ZED_Camera::init(bool record, const std::string &playback_video, const std::string &recording_out, sl::RESOLUTION res, int fps) {
     zed = sl::Camera();
 
     // Conf params

@@ -44,18 +44,39 @@ class ZED_Camera {
         sl::Camera zed;
         // Recording state
         bool recording;
+        // Actually initiates the object
+        void init(bool record, const std::string &playback_video, const std::string &recording_out, sl::RESOLUTION res, int fps);
     public:
+
         /**
-         * Setups up all the camera runtime variables and begins the video stream
-         * NOTE: When playing a video it will continue to run even when not calling update()
+         * Setups up all the camera runtime variables and begins the live video stream.</>Uses this module's video quality setter.
          *
-         * @param record Whether to record the stream or not, when playing back recording will not work
-         * @param playback_video Video to be played back, when left empty it will try to open a stream to a connected Zed camera
+         * @param record Whether to record the stream or not
          * @param recording_out Name of the video to be saved if recording
-         * @param res Resolution to be picked up
-         * @param fps Framerate
+         * @param quality Video resolution along with framerate
          */
-        ZED_Camera(bool record, const std::string &playback_video = empty, const std::string &recording_out = empty, sl::RESOLUTION res = sl::RESOLUTION::HD1080, int fps = 30);
+        ZED_Camera(bool record, const std::string &recording_out = empty, Video_Quality quality = Video_Quality::HD1080_30fps);
+
+        /**
+         * Setups up all the camera runtime variables and begins the live video stream.</>Uses zed's video quality setter.
+         *
+         * @param record Whether to record the stream or not
+         * @param res Video resolution
+         * @param fps Video framerate
+         * @param recording_out Name of the video to be saved if recording
+         *
+         * @overload
+         */
+        ZED_Camera(bool record, sl::RESOLUTION res, int fps, const std::string &recording_out = empty);
+
+        /**
+         * Setups up all the camera runtime variables and begins the pre-recorded video stream.
+         *
+         * @param playback_video Video to serve as a stream
+         *
+         * @overload
+         */
+        ZED_Camera(const std::string &playback_video);
 
         /**
          * Will just call the cameras destructor and call close()
