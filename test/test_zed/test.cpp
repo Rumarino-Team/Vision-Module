@@ -23,6 +23,7 @@ TEST(ZED, Run_Video) {
         exec_time += duration.count();
         EXPECT_FALSE(frame.image.empty());
         EXPECT_FALSE(frame.depth_map.empty());
+        EXPECT_FALSE(frame.point_cloud.empty());
     }
     std::cout << "30 frames took " << exec_time * 0.000001 << "seconds." << std::endl;
     cam.close();
@@ -42,6 +43,7 @@ TEST(ZED, Live_video) {
         exec_time += duration.count();
         EXPECT_FALSE(frame.image.empty());
         EXPECT_FALSE(frame.depth_map.empty());
+        EXPECT_FALSE(frame.point_cloud.empty());
     }
     std::cout << "30 frames took " << exec_time * 0.000001 << " seconds." << std::endl;
     cam.close();
