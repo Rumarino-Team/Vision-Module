@@ -1,5 +1,6 @@
 #include <sys/stat.h>
 #include <iostream>
+#include <chrono>
 #include <gtest/gtest.h>
 #include "zedmod/zedmod.hpp"
 
@@ -12,11 +13,18 @@ std::string playback_video("media/test_input_video.svo");
 
 TEST(ZED, Run_Video) {
     ZED_Camera cam(false, playback_video);
-    for (int i=0; i < 10; i++) {
+    int exec_time = 0;
+    for (int i=0; i < 30; i++) {
+        auto start = std::chrono::high_resolution_clock::now();
         Video_Frame frame = cam.update();
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+        std::cout << "Duration in frame " << i << " " << duration.count() << " microseconds." << std::endl;
+        exec_time += duration.count();
         EXPECT_FALSE(frame.image.empty());
         EXPECT_FALSE(frame.depth_map.empty());
     }
+    std::cout << "30 frames took " << exec_time * 0.000001 << "seconds." << std::endl;
     cam.close();
 }
 
@@ -24,11 +32,18 @@ std::string video_save("media/recording_out.svo");
 ZED_Camera cam(true, "", video_save);
 
 TEST(ZED, Live_video) {
-    for (int i=0; i < 10; i++) {
+    int exec_time = 0;
+    for (int i=0; i < 30; i++) {
+        auto start = std::chrono::high_resolution_clock::now();
         Video_Frame frame = cam.update();
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+        std::cout << "Duration in frame " << i << " " << duration.count() << " microseconds." << std::endl;
+        exec_time += duration.count();
         EXPECT_FALSE(frame.image.empty());
         EXPECT_FALSE(frame.depth_map.empty());
     }
+    std::cout << "30 frames took " << exec_time * 0.000001 << " seconds." << std::endl;
     cam.close();
 }
 
