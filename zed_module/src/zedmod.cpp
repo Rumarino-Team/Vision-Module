@@ -1,4 +1,11 @@
 #include "zedmod/zedmod.hpp"
+
+/**
+ * Convert Zed images to OpenCV images
+ *
+ * @param input Zed image to be converted
+ * @return OpenCV image virtually identical to the Zed one
+ */
 cv::Mat zedMat2cvMat(sl::Mat input) {
     // Mapping between MAT_TYPE and CV_TYPE
     int cv_type = -1;
@@ -19,6 +26,12 @@ cv::Mat zedMat2cvMat(sl::Mat input) {
     return cv::Mat(input.getHeight(), input.getWidth(), cv_type, input.getPtr<sl::uchar1>(sl::MEM::CPU));
 }
 
+/**
+ * Returns a verbose version of the given Zed ERROR_CODE
+ *
+ * @param error Zed error code
+ * @return A verbose string of the given error code
+ */
 const char* ErrorToString(sl::ERROR_CODE error) {
     // There is no pretty way of doing this...
     switch (error) {
