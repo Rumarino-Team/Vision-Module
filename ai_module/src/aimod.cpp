@@ -30,23 +30,34 @@ AI::AI(bool record, std::string input_path, std::string output_path) {
     names = input_path + "/custom.names";
 }
 
-DetectedObject AI::detect(Video_Frame frame) {
+std::vector<DetectedObject> AI::detect(Video_Frame frame, float minimum_confidence) {
     //Create the resulting struct
-    DetectedObject result;
+    std::vector<DetectedObject> results;
 
     //Load Darkhelp < darkhelp(config file, weights file, .names file)
     DarkHelp darkhelp(cfg, weights, names);
 
     //Predict items from the frame
-    DarkHelp::PredictionResults prediction = darkhelp.predict(frame.image);
-    result.bounding_box = prediction.at(0).rect;
-    result.obj_id = prediction.at(0).best_class;
-    result.obj_name = (prediction.at(0).name).c_str();
+    DarkHelp::PredictionResults predictions = darkhelp.predict(frame.image);
 
-    //Get mid point from of the predicted image and get the distance from the depth image
-    //Float taken from depth map is distance in millimeters (mm)
-    cv::Point2f mid_point = prediction.at(0).original_point;
-    result.distance = frame.depth_map.at<float>(mid_point);
+    //Iterate though every detected object
+    for (DarkHelp::PredictionResult &prediction : predictions) {
+        if (prediction.best_probability >= minimum_confidence) {
+            DetectedObject result;
+            result.bounding_box = prediction.rect;
+            result.obj_id = prediction.best_class;
+            result.obj_name = (prediction.name).c_str();
+
+            //Get mid point from of the predicted image and get the distance from the depth image
+            //Float taken from depth map is distance in millimeters (mm)
+            // TODO: Improve the strategy to find location
+            cv::Point2f mid_point = prediction.original_point;
+            result.distance = frame.depth_map.at<float>(mid_point);
+            // Get point3d location from point cloud
+            results.push_back(result);
+        }
+    }
+
 
     if(recording){
         //TODO: change to runtime recording with CV VideoCapture
@@ -56,12 +67,12 @@ DetectedObject AI::detect(Video_Frame frame) {
         save_count++;
     }
 
-    return result;
+    return results;
 }
 
-std::string AI::close() {
+void AI::close() {
     if(recording){
-        //TODO: close CV VideoCapture and return path
+        //TODO: close CV VideoCapture
     }
     else
         return "Closing AI. No CV Video was generated.";
