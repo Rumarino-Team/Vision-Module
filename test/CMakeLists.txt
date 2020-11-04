@@ -37,4 +37,22 @@ set_target_properties(libgmock PROPERTIES
 include_directories("${source_dir}/googletest/include"
                     "${source_dir}/googlemock/include")
 
-add_subdirectory(test_zed)
+# Create testers
+file(GLOB SRCS *.cpp)
+
+project (tests)
+
+ADD_EXECUTABLE(${PROJECT_NAME} ${SRCS})
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+        libgtest
+        mod::zed
+        mod::ai
+        mod::api
+        )
+
+add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
+
+# Copy resource directories when compiling
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_LIST_DIR}/media ${CMAKE_BINARY_DIR}/test/media)
