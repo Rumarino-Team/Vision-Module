@@ -3,6 +3,7 @@
 #include <chrono>
 #include <gtest/gtest.h>
 #include "zedmod/zedmod.hpp"
+//#include "tools.hpp"
 
 bool file_exists(const char* file) {
     struct stat buffer;
