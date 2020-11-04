@@ -1,4 +1,11 @@
 #include "zedmod/zedmod.hpp"
+
+/**
+ * Convert Zed images to OpenCV images
+ *
+ * @param input Zed image to be converted
+ * @return OpenCV image virtually identical to the Zed one
+ */
 cv::Mat zedMat2cvMat(sl::Mat input) {
     // Mapping between MAT_TYPE and CV_TYPE
     int cv_type = -1;
@@ -19,6 +26,12 @@ cv::Mat zedMat2cvMat(sl::Mat input) {
     return cv::Mat(input.getHeight(), input.getWidth(), cv_type, input.getPtr<sl::uchar1>(sl::MEM::CPU));
 }
 
+/**
+ * Returns a verbose version of the given Zed ERROR_CODE
+ *
+ * @param error Zed error code
+ * @return A verbose string of the given error code
+ */
 const char* ErrorToString(sl::ERROR_CODE error) {
     // There is no pretty way of doing this...
     switch (error) {
@@ -56,7 +69,35 @@ const char* ErrorToString(sl::ERROR_CODE error) {
     }
 }
 
-ZED_Camera::ZED_Camera(bool record, const std::string &playback_video, const std::string &recording_out, sl::RESOLUTION res, int fps) {
+ZED_Camera::ZED_Camera(bool record, const std::string &recording_out, Video_Quality quality) {
+    sl::RESOLUTION res;
+    int fps;
+
+    switch (quality) {
+        case Video_Quality::HD2K_15fps: res = sl::RESOLUTION::HD2K; fps=15; break;
+        case Video_Quality::HD1080_15fps: res = sl::RESOLUTION::HD1080; fps=15; break;
+        case Video_Quality::HD1080_30fps: res = sl::RESOLUTION::HD1080; fps=30; break;
+        case Video_Quality::HD720_15fps: res = sl::RESOLUTION::HD720; fps=15; break;
+        case Video_Quality::HD720_30fps: res = sl::RESOLUTION::HD720; fps=30; break;
+        case Video_Quality::HD720_60fps: res = sl::RESOLUTION::HD720; fps=60; break;
+        case Video_Quality::VGA_15fps: res = sl::RESOLUTION::VGA; fps=15; break;
+        case Video_Quality::VGA_30fps: res = sl::RESOLUTION::VGA; fps=30; break;
+        case Video_Quality::VGA_60fps: res = sl::RESOLUTION::VGA; fps=60; break;
+        case Video_Quality::VGA_100fps: res = sl::RESOLUTION::VGA; fps=100; break;
+    }
+
+    this->init(record, std::string(), recording_out, res, fps);
+}
+
+ZED_Camera::ZED_Camera(bool record, sl::RESOLUTION res, int fps, const std::string &recording_out) {
+    this->init(record, std::string(), recording_out, res, fps);
+}
+
+ZED_Camera::ZED_Camera(const std::string &playback_video) {
+    this->init(false, playback_video, std::string(), sl::RESOLUTION::HD1080, 30);
+}
+
+void ZED_Camera::init(bool record, const std::string &playback_video, const std::string &recording_out, sl::RESOLUTION res, int fps) {
     zed = sl::Camera();
 
     // Conf params
@@ -103,14 +144,16 @@ ZED_Camera::~ZED_Camera() { this->close(); }
 
 Video_Frame ZED_Camera::update() {
     Video_Frame new_frame;
-    sl::Mat left_image, depth_map;
+    sl::Mat left_image, depth_map, point_cloud;
     if (zed.grab() == sl::ERROR_CODE::SUCCESS) {
         // Since the following functions just copy over to the given variable
         // We must first initialize a sl::Mat to then convert over to  cv::Mat
         zed.retrieveImage(left_image, sl::VIEW::LEFT);
         zed.retrieveMeasure(depth_map, sl::MEASURE::DEPTH);
+        zed.retrieveMeasure(point_cloud, sl::MEASURE::XYZ);
         new_frame.image = zedMat2cvMat(left_image);
         new_frame.depth_map = zedMat2cvMat(depth_map);
+        new_frame.point_cloud = zedMat2cvMat(point_cloud);
     }
     else if (zed.grab() == sl::ERROR_CODE::END_OF_SVOFILE_REACHED) {
         std::cout << "SVO end has been reached. Looping back to first frame" << std::endl;
@@ -127,4 +170,51 @@ void ZED_Camera::close() {
     }
     zed.close();
     zed.~Camera();
+}
+
+void svo2img(const std::string &playback_video, const std::string &image_save_path) {
+    sl::Camera zed;
+
+    // Conf params
+    sl::InitParameters init_params;
+    init_params.sdk_verbose = true; // Use for the debug flag.
+
+    init_params.input.setFromSVOFile(playback_video.c_str());
+    init_params.svo_real_time_mode = false; // This will prevent the video to play realtime
+
+    // Check if it opens, it not print error
+    try {
+        sl::ERROR_CODE err = zed.open(init_params);
+        if (err != sl::ERROR_CODE::SUCCESS) {
+            throw err;
+        }
+    }
+    catch (sl::ERROR_CODE error) {
+        std::cout << "An exception occurred." << ErrorToString(error) << '\n';
+    }
+    int img_count = 0;
+    while (true) {
+        img_count++;
+        if (zed.grab() == sl::ERROR_CODE::SUCCESS) {
+            // Get and convert the image file
+            sl::Mat left_image;
+            zed.retrieveImage(left_image, sl::VIEW::LEFT);
+            cv::Mat image = zedMat2cvMat(left_image);
+
+            // Support for writing JPG
+            std::vector<int> compression_params;
+            compression_params.push_back( cv::IMWRITE_JPEG_QUALITY );
+            compression_params.push_back( 100 );
+
+            // Save the image file
+            std::string img_path = image_save_path+"/image"+std::to_string(img_count)+".jpg";
+            std::cout << "Saved frame " << img_count << " as " << img_path << std::endl;
+            cv::imwrite(img_path, image, compression_params);
+        }
+        else if (zed.grab() == sl::ERROR_CODE::END_OF_SVOFILE_REACHED) {
+            // When video ends, stop
+            break;
+        }
+    }
+    zed.close();
 }
