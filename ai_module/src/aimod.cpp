@@ -1,7 +1,7 @@
 #include "aimod/aimod.hpp"
 
 AI::AI(bool record, std::string input_path, std::string output_path) {
-    //Set paths
+    //Set path, a path should NOT end with a "/"
     out_path = output_path;
 
     //Set recording flag
@@ -36,28 +36,37 @@ AI::AI(bool record, std::string input_path, std::string output_path) {
     out_vid = cv::VideoWriter(output_path+"/output_vid.avi", cv::CAP_OPENCV_MJPEG, 10, cv::Size(1920, 1080));
 }
 
-DetectedObject AI::detect(Video_Frame frame) {
+std::vector<DetectedObject> AI::detect(Video_Frame frame, float minimum_confidence) {
     //Create the resulting struct
-    DetectedObject result;
+    std::vector<DetectedObject> results;
 
     //Predict items from the frame
     DarkHelp::PredictionResults prediction = darkhelp.predict(frame.image);
-    result.bounding_box = prediction.at(0).rect;
-    result.obj_id = prediction.at(0).best_class;
-    result.obj_name = (prediction.at(0).name).c_str();
 
-    //Get mid point from of the predicted image and get the distance from the depth image
-    //Float taken from depth map is distance in millimeters (mm)
-    cv::Point2f mid_point = prediction.at(0).original_point;
-    result.distance = frame.depth_map.at<float>(mid_point);
+    for(DarkHelp::PredictionResult &prediction : prediction){
+        if(prediction.best_probability >= minimum_confidence){
+            DetectedObject result;
 
-    //Saving the 3D point on the struct
-    std::vector<float> pc_values = frame.point_cloud.at<std::vector<float>>(mid_point);
-    result.point_3d.x = pc_values[0];
-    result.point_3d.y = pc_values[1];
-    result.point_3d.z = pc_values[2];
-//    float x = pc_values[0]; float y = pc_values[1]; float z = pc_values[2];
-//    float distance = sqrt(x*x + y*y + z*z);
+            result.bounding_box = prediction.rect;
+            result.obj_id = prediction.best_class;
+            result.obj_name = (prediction.name).c_str();
+
+            //Get mid point from of the predicted image and get the distance from the depth image
+            //Float taken from depth map is distance in millimeters (mm)
+            cv::Point2f mid_point = prediction.original_point;
+            result.distance = frame.depth_map.at<float>(mid_point);
+
+            //Saving the 3D point on the struct
+            std::vector<float> pc_values = frame.point_cloud.at<std::vector<float>>(mid_point);
+            result.point_3d.x = pc_values[0];
+            result.point_3d.y = pc_values[1];
+            result.point_3d.z = pc_values[2];
+            //float x = pc_values[0]; float y = pc_values[1]; float z = pc_values[2];
+            //float distance = sqrt(x*x + y*y + z*z);
+
+            results.push_back(result);
+        }
+    }
 
     if(recording){
         //Runtime recording with CV VideoWriter, write the annotated images
@@ -70,7 +79,7 @@ DetectedObject AI::detect(Video_Frame frame) {
         save_count++;
     }
 
-    return result;
+    return results;
 }
 
 std::string AI::close() {
