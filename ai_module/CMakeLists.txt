@@ -14,5 +14,5 @@ target_link_libraries(${PROJECT_NAME}
                         mod::zed
                         ${SPECIAL_OS_LIBS}
                         ${OpenCV_LIBS}
-                        ${DARKNET_LIBRARY} ${DARKNET_CPP_LIBRARY}
+                        ${DARKNET_LIBRARY}
                         ${CUDA_LIBRARIES} ${CUDA_npps_LIBRARY})
