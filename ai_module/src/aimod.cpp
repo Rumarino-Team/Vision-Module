@@ -1,9 +1,6 @@
 #include "aimod/aimod.hpp"
 
-AI::AI(bool record, std::string input_path, std::string output_path) {
-    //Set path, a path should NOT end with a "/"
-    out_path = output_path;
-
+AI::AI(std::string input_path, bool record, std::string output_path) {
     //Set recording flag
     recording = record;
 
@@ -25,18 +22,24 @@ AI::AI(bool record, std::string input_path, std::string output_path) {
     std::string weights = input_path + "/weights/" + dir_name + "_best.weights";
     std::string names = input_path + "/custom.names";
 
-    //Load Darkhelp < darkhelp(config file, weights file, .names file)
-    //darkhelp = DarkHelp(cfg, weights, names);
+    // Load darknet
     darknet = new Detector(cfg, weights);
 
-    //Start the CV Video Writer
-    //VideoWriter video("outcpp.avi",CV_FOURCC('M','J','P','G'),10, Size(frame_width,frame_height));
-    out_vid = cv::VideoWriter(output_path, cv::CAP_OPENCV_MJPEG, 10, cv::Size(1920, 1080));
+    if(recording) {
+        //Start the CV Video Writer
+        //VideoWriter video("outcpp.avi",CV_FOURCC('M','J','P','G'),10, Size(frame_width,frame_height));
+        out_vid = cv::VideoWriter(output_path, cv::CAP_OPENCV_MJPEG, 10, cv::Size(1920, 1080));
+    }
 }
 
-std::vector<DetectedObject> AI::detect(Video_Frame frame, float minimum_confidence) {
+std::vector<DetectedObject> AI::detect(Video_Frame &frame, float minimum_confidence) {
     //Create the resulting struct
     std::vector<DetectedObject> results;
+
+    // Image where detected structures are written in
+    cv::Mat annotated_img;
+    if(recording)
+        annotated_img = frame.image;
 
     //Predict items from the frame
     auto predictions = darknet->detect(frame.image, minimum_confidence);
@@ -54,18 +57,18 @@ std::vector<DetectedObject> AI::detect(Video_Frame frame, float minimum_confiden
         result.distance = frame.depth_map.at<float>(mid_point);
 
         //Saving the 3D point on the struct
-        std::vector<float> pc_values = frame.point_cloud.at<std::vector<float>>(mid_point);
-        result.point_3d.x = pc_values[0];
-        result.point_3d.y = pc_values[1];
-        result.point_3d.z = pc_values[2];
-        //float x = pc_values[0]; float y = pc_values[1]; float z = pc_values[2];
-        //float distance = sqrt(x*x + y*y + z*z);
+        result.point_3d.x = frame.point_cloud.at<std::vector<float>>(mid_point)[0];
+        result.point_3d.y = frame.point_cloud.at<std::vector<float>>(mid_point)[1];
+        result.point_3d.z = frame.point_cloud.at<std::vector<float>>(mid_point)[2];
+
+        if(recording) {
+            cv::rectangle(annotated_img, result.bounding_box, cv::Scalar(0,255,0), 1, 8, 0);
+        }
 
         results.push_back(result);
     }
 
     if(recording){
-        cv::Mat annotated_img = frame.image;
         out_vid.write(annotated_img);
     }
 
