@@ -1,5 +1,9 @@
 #include <iostream>
 #include <chrono>
+#include <mutex>
+#include <atomic>
+#include <pthread.h>
+#include <condition_variable>
 #include <gtest/gtest.h>
 #include "zedmod/zedmod.hpp"
 #include "aimod/aimod.hpp"
@@ -11,13 +15,12 @@ bool file_exists_ai(const char* file) {
 }
 
 std::string in_video("media/test_input_video.svo");
-//std::string playback_video_ai = "media/test_input_video.svo";
 
 //CHANGE THE INPUT PATH TO WHERE YOU HAVE THE RUBBER-DUCKY FOLDER!
 std::string input_path = "media/RUBBER-DUCKY";
 std::string out_path = "media/ai_output.avi";
 
-TEST(AI, File_Checker){
+TEST(AI, File_Checker) {
     std::vector <std::string> tokens;
     std::stringstream charToString(input_path);
     std::string intermediate;
@@ -35,29 +38,66 @@ TEST(AI, File_Checker){
     EXPECT_TRUE(file_exists_ai(names.c_str()));
 }
 
-TEST(AI, Run_Video) {
-    ZED_Camera cam(in_video);
-    AI ai(true, input_path, out_path);
-    float minimum_confidence = 0.60;
+// Declare thread functions
+// The multithreading here is simple and technically linear
+// But since where only testing the AI part this is ok
+// Multithreading is in response to ZED and Darknet not being able to run in the same thread
+Video_Frame threaded_frame;
+std::vector<DetectedObject> threaded_obj;
+std::mutex frame_mutex;
+std::condition_variable new_frame;
+std::condition_variable new_detect;
 
-    int exec_time = 0;
-    for (int i=0; i < 30; i++) {
+
+void camera_stream(ZED_Camera *cam, std::atomic<bool> &running) {
+    while(running) {
         auto start = std::chrono::high_resolution_clock::now();
-        Video_Frame frame = cam.update();
+
+        std::unique_lock<std::mutex> frame_lock(frame_mutex);
+        threaded_frame = cam->update();
+        frame_lock.unlock();
+        new_frame.notify_one();
+
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-        std::cout << "Duration in frame " << i << " " << duration.count() << " microseconds." << std::endl;
-        exec_time += duration.count();
-
-        //The following can NOT be empty, otherwise the AI will go loco
-        ASSERT_FALSE(frame.image.empty());
-        ASSERT_FALSE(frame.depth_map.empty());
-        ASSERT_FALSE(frame.point_cloud.empty());
-
-        //ai.detect(frame, minimum_confidence);
+        int zed_time_per_frame = duration.count();
+        std::cout << "Camera stream is going at " << 1000000/zed_time_per_frame << " fps." << std::endl;
     }
-    std::cout << "30 frames took " << exec_time * 0.000001 << "seconds." << std::endl;
-    //ai.close();
+}
+
+TEST(AI, Run_Video) {
+    ZED_Camera cam(in_video);
+    AI ai(input_path, false, out_path);
+    float minimum_confidence = 0.60;
+
+    static std::atomic<bool> running { true };
+    std::thread camera_thread(camera_stream, &cam, std::ref(running));
+
+    for (int i=0; i < 30; i++) {
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        std::unique_lock<std::mutex> frame_lock(frame_mutex);
+        new_frame.wait(frame_lock);
+        threaded_obj = ai.detect(threaded_frame, minimum_confidence);
+        frame_lock.unlock();
+
+        auto stop = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+        int ai_time_per_frame = duration.count();
+        std::cout << "AI detection is going at " << 1000000/ai_time_per_frame << " fps." << std::endl;
+
+        std::cout << i << std::endl;
+//        for (DetectedObject obj : threaded_obj) {
+//            //EXPECT_TRUE();
+//
+//        }
+    }
+    //Close the threads
+    running = false;
+    camera_thread.join();
+    // Close the objects
+    ai.close();
     cam.close();
 }
 
