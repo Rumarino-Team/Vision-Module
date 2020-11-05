@@ -14,8 +14,8 @@ std::string in_video("media/test_input_video.svo");
 //std::string playback_video_ai = "media/test_input_video.svo";
 
 //CHANGE THE INPUT PATH TO WHERE YOU HAVE THE RUBBER-DUCKY FOLDER!
-std::string input_path = "/home/hectormiranda/Downloads/RUBBER-DUCKY";
-std::string out_path = "media/ai_output";
+std::string input_path = "media/RUBBER-DUCKY";
+std::string out_path = "media/ai_output.avi";
 
 TEST(AI, File_Checker){
     std::vector <std::string> tokens;
