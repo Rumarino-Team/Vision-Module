@@ -7,9 +7,6 @@ AI::AI(bool record, std::string input_path, std::string output_path) {
     //Set recording flag
     recording = record;
 
-    //Initialize the save count, this is used for naming purposes on the output images
-    save_count = 0;
-
     //Set name of the directory from input path
     //Vector of string to save tokens
     std::vector <std::string> tokens;
@@ -29,11 +26,12 @@ AI::AI(bool record, std::string input_path, std::string output_path) {
     std::string names = input_path + "/custom.names";
 
     //Load Darkhelp < darkhelp(config file, weights file, .names file)
-    darkhelp = DarkHelp(cfg, weights, names);
+    //darkhelp = DarkHelp(cfg, weights, names);
+    darknet = new Detector(cfg, weights);
 
     //Start the CV Video Writer
     //VideoWriter video("outcpp.avi",CV_FOURCC('M','J','P','G'),10, Size(frame_width,frame_height));
-    out_vid = cv::VideoWriter(output_path+"/output_vid.avi", cv::CAP_OPENCV_MJPEG, 10, cv::Size(1920, 1080));
+    out_vid = cv::VideoWriter(output_path, cv::CAP_OPENCV_MJPEG, 10, cv::Size(1920, 1080));
 }
 
 std::vector<DetectedObject> AI::detect(Video_Frame frame, float minimum_confidence) {
@@ -41,54 +39,43 @@ std::vector<DetectedObject> AI::detect(Video_Frame frame, float minimum_confiden
     std::vector<DetectedObject> results;
 
     //Predict items from the frame
-    DarkHelp::PredictionResults prediction = darkhelp.predict(frame.image);
+    auto predictions = darknet->detect(frame.image, minimum_confidence);
 
-    for(DarkHelp::PredictionResult &prediction : prediction){
-        if(prediction.best_probability >= minimum_confidence){
-            DetectedObject result;
+    for(auto &prediction : predictions) {
+        DetectedObject result;
 
-            result.bounding_box = prediction.rect;
-            result.obj_id = prediction.best_class;
-            result.obj_name = (prediction.name).c_str();
+        result.bounding_box = cv::Rect(prediction.x, prediction.y, prediction.w, prediction.h);
+        result.obj_id = prediction.obj_id;
+        result.obj_name = "Empty";
 
-            //Get mid point from of the predicted image and get the distance from the depth image
-            //Float taken from depth map is distance in millimeters (mm)
-            cv::Point2f mid_point = prediction.original_point;
-            result.distance = frame.depth_map.at<float>(mid_point);
+        //Get mid point from of the predicted image and get the distance from the depth image
+        //Float taken from depth map is distance in millimeters (mm)
+        cv::Point2f mid_point = cv::Point2f(prediction.x + prediction.w/2, prediction.y + prediction.h/2);
+        result.distance = frame.depth_map.at<float>(mid_point);
 
-            //Saving the 3D point on the struct
-            std::vector<float> pc_values = frame.point_cloud.at<std::vector<float>>(mid_point);
-            result.point_3d.x = pc_values[0];
-            result.point_3d.y = pc_values[1];
-            result.point_3d.z = pc_values[2];
-            //float x = pc_values[0]; float y = pc_values[1]; float z = pc_values[2];
-            //float distance = sqrt(x*x + y*y + z*z);
+        //Saving the 3D point on the struct
+        std::vector<float> pc_values = frame.point_cloud.at<std::vector<float>>(mid_point);
+        result.point_3d.x = pc_values[0];
+        result.point_3d.y = pc_values[1];
+        result.point_3d.z = pc_values[2];
+        //float x = pc_values[0]; float y = pc_values[1]; float z = pc_values[2];
+        //float distance = sqrt(x*x + y*y + z*z);
 
-            results.push_back(result);
-        }
+        results.push_back(result);
     }
 
     if(recording){
-        //Runtime recording with CV VideoWriter, write the annotated images
-        //https://stackoverflow.com/questions/22765397/create-video-from-images-using-videocapture-opencv
-        cv::Mat annotated_img = darkhelp.annotate();
+        cv::Mat annotated_img = frame.image;
         out_vid.write(annotated_img);
-
-        //Testing purposes, saving individual annotated images
-        cv::imwrite(out_path+"/frameNum"+std::to_string(save_count)+".png", annotated_img, {cv::IMWRITE_PNG_COMPRESSION, 9});
-        save_count++;
     }
 
     return results;
 }
 
-std::string AI::close() {
+void AI::close() {
     if(recording){
         out_vid.release();
-        return "Closing AI. Video generated at: " + out_path;
     }
-    else
-        return "Closing AI. No CV Video was generated.";
 }
 
 AI::~AI() {
