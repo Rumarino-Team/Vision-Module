@@ -5,10 +5,10 @@
 #include "zedmod/zedmod.hpp"
 struct DetectedObject { //Built from DarkHelp::PredictionResult
     cv::Rect bounding_box;
-    int obj_id;
-    const char* obj_name;
+    int id;
+    const char* name;
     float distance;
-    cv::Point3f point_3d;
+    cv::Point3f location;
 };
 
 class AI {
