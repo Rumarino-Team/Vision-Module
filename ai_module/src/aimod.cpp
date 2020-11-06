@@ -75,6 +75,39 @@ std::vector<DetectedObject> AI::detect(Video_Frame &frame, float minimum_confide
     return results;
 }
 
+std::vector<DetectedObject> AI::detect(cv::Mat &frame, float minimum_confidence) {
+    //Create the resulting struct
+    std::vector<DetectedObject> results;
+
+    // Image where detected structures are written in
+    cv::Mat annotated_img;
+    if(recording)
+        annotated_img = frame;
+
+    //Predict items from the frame
+    auto predictions = darknet->detect(frame, minimum_confidence);
+
+    for(auto &prediction : predictions) {
+        DetectedObject result;
+
+        result.bounding_box = cv::Rect(prediction.x, prediction.y, prediction.w, prediction.h);
+        result.obj_id = prediction.obj_id;
+        result.obj_name = "Empty";
+
+        if(recording) {
+            cv::rectangle(annotated_img, result.bounding_box, cv::Scalar(0,255,0), 1, 8, 0);
+        }
+
+        results.push_back(result);
+    }
+
+    if(recording){
+        out_vid.write(annotated_img);
+    }
+
+    return results;
+}
+
 void AI::close() {
     if(recording){
         out_vid.release();
