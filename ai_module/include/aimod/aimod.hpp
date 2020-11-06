@@ -15,7 +15,7 @@ struct DetectedObject { //Built from DarkHelp::PredictionResult
 class AI {
     private:
         bool recording;
-        std::string dir_name;
+        std::vector<std::string>names;
         cv::VideoWriter out_vid;
         Detector* darknet;
 public:

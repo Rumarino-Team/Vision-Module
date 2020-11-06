@@ -4,15 +4,16 @@ AI::AI(std::string input_path, bool record, std::string output_path) {
     //Set recording flag
     recording = record;
 
-    std::string cfg, weights, names;
+    std::string cfg, weights, names_path;
 
+    //Identify the files inside the folder
     for (const auto & entry : std::experimental::filesystem::directory_iterator(input_path)) {
         if (entry.path().has_extension()) {
             if (entry.path().extension().string() == ".cfg") {
                 cfg = entry.path().string();
             }
             else if (entry.path().extension().string() == ".names") {
-                names = entry.path().string();
+                names_path = entry.path().string();
             }
         }
         else if (entry.path().stem().string() == "weights") {
@@ -24,6 +25,20 @@ AI::AI(std::string input_path, bool record, std::string output_path) {
                     break;
                 }
             }
+        }
+    }
+
+    //Get the names inside the file
+    std::ifstream names_file;
+    names_file.open(names_path.c_str());
+    if(!names_file) {
+        std::cout << "[AI] [ERROR] No .nammes file found";
+    }
+    else {
+        std::string name;
+        while(!names_file.eof()) {
+            getline(names_file, name);
+            names.push_back(name);
         }
     }
 
@@ -53,7 +68,14 @@ std::vector<DetectedObject> AI::detect(Video_Frame &frame, float minimum_confide
 
         result.bounding_box = cv::Rect(prediction.x, prediction.y, prediction.w, prediction.h);
         result.id = prediction.obj_id;
-        result.name = "Not implemented";
+        // Get the name of the detected object; leave it empty if not found
+        if (prediction.obj_id < names.size()) {
+            result.name = names[prediction.obj_id].c_str();
+        }
+        else {
+            result.name = "";
+        }
+
 
         //Get mid point from of the predicted image and get the distance from the depth image
         //Float taken from depth map is distance in millimeters (mm)
