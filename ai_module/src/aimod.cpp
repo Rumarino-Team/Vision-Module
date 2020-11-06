@@ -48,8 +48,8 @@ std::vector<DetectedObject> AI::detect(Video_Frame &frame, float minimum_confide
         DetectedObject result;
 
         result.bounding_box = cv::Rect(prediction.x, prediction.y, prediction.w, prediction.h);
-        result.obj_id = prediction.obj_id;
-        result.obj_name = "Empty";
+        result.id = prediction.obj_id;
+        result.name = "Not implemented";
 
         //Get mid point from of the predicted image and get the distance from the depth image
         //Float taken from depth map is distance in millimeters (mm)
@@ -57,9 +57,9 @@ std::vector<DetectedObject> AI::detect(Video_Frame &frame, float minimum_confide
         result.distance = frame.depth_map.at<float>(mid_point);
 
         //Saving the 3D point on the struct
-        result.point_3d.x = frame.point_cloud.at<std::vector<float>>(mid_point)[0];
-        result.point_3d.y = frame.point_cloud.at<std::vector<float>>(mid_point)[1];
-        result.point_3d.z = frame.point_cloud.at<std::vector<float>>(mid_point)[2];
+        result.location.x = frame.point_cloud.at<cv::Vec4f>(mid_point)[0];
+        result.location.y = frame.point_cloud.at<cv::Vec4f>(mid_point)[1];
+        result.location.z = frame.point_cloud.at<cv::Vec4f>(mid_point)[2];
 
         if(recording) {
             cv::rectangle(annotated_img, result.bounding_box, cv::Scalar(0,255,0), 1, 8, 0);
@@ -91,8 +91,8 @@ std::vector<DetectedObject> AI::detect(cv::Mat &frame, float minimum_confidence)
         DetectedObject result;
 
         result.bounding_box = cv::Rect(prediction.x, prediction.y, prediction.w, prediction.h);
-        result.obj_id = prediction.obj_id;
-        result.obj_name = "Empty";
+        result.id = prediction.obj_id;
+        result.name = "Empty";
 
         if(recording) {
             cv::rectangle(annotated_img, result.bounding_box, cv::Scalar(0,255,0), 1, 8, 0);
