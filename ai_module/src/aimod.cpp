@@ -38,7 +38,7 @@ std::vector<DetectedObject> AI::detect(Video_Frame &frame, float minimum_confide
     // Image where detected structures are written in
     cv::Mat annotated_img;
     if(recording)
-        annotated_img = frame.image;
+        cv::cvtColor(frame.image, annotated_img, cv::COLOR_BGRA2BGR);
 
     //Predict items from the frame
     auto predictions = darknet->detect(frame.image, minimum_confidence);
@@ -60,9 +60,8 @@ std::vector<DetectedObject> AI::detect(Video_Frame &frame, float minimum_confide
         result.location.y = frame.point_cloud.at<cv::Vec4f>(mid_point)[1];
         result.location.z = frame.point_cloud.at<cv::Vec4f>(mid_point)[2];
 
-        if(recording) {
-            cv::rectangle(annotated_img, result.bounding_box, cv::Scalar(0,255,0), 1, 8, 0);
-        }
+        if(recording)
+            cv::rectangle(annotated_img, result.bounding_box, cv::Scalar(0,255,0), 4, 8, 0);
 
         results.push_back(result);
     }
