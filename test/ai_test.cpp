@@ -106,11 +106,16 @@ TEST(AI, Multi_Threading) {
         int ai_time_per_frame = duration.count();
         std::cout << "AI detection is going at " << 1000000/ai_time_per_frame << " fps." << std::endl;
 
-        std::cout << i << std::endl;
-//        for (DetectedObject obj : threaded_obj) {
-//            //EXPECT_TRUE();
-//
-//        }
+        std::cout << "Objects detected at frame " << i << " \n{" <<std::endl;
+        for (DetectedObject obj : threaded_obj) {
+            std::cout << "\tBounding box: ("<<obj.bounding_box.x<<", "<<obj.bounding_box.y<<") w: "<<obj.bounding_box.width<<" h: " <<obj.bounding_box.height<< std::endl;
+            std::cout << "\tObject ID: "<< obj.id << std::endl;
+            std::cout << "\tObject Name: " << obj.name << std::endl;
+            std::cout << "\tDistance: " << obj.distance << std::endl;
+            std::cout << "\tLocation: (" << obj.location.x << ", " << obj.location.y << ", " << obj.location.z << " )\n" << std::endl;
+            //EXPECT_TRUE();
+        }
+        std::cout << "}" << std::endl;
     }
     //Close the threads
     running = false;
