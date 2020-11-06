@@ -3,6 +3,7 @@
 #include <chrono>
 #include <gtest/gtest.h>
 #include "zedmod/zedmod.hpp"
+//#include "tools.hpp"
 
 bool file_exists(const char* file) {
     struct stat buffer;
@@ -53,11 +54,6 @@ TEST(ZED, Save_Video) {
     EXPECT_TRUE(file_exists(video_save.c_str()));
 }
 
-TEST(ZED, Save_Images) {
-    svo2img(playback_video, "media/");
-}
-
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+TEST(ZED, DISABLE_Save_Images) {
+    //svo2img(playback_video, "media/");
 }

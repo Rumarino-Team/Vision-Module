@@ -23,14 +23,14 @@ find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INLCUDE_DIRS})
 
 # Setup Darknet libs
-find_library(DARKHELP_LIBRARY NAMES darkhelp libdarkhelp.so)
-find_library(DARKNET_LIBRARY NAMES darknet libdarknet.so)
+find_library(DARKNET_LIBRARY NAMES dark libdark.so libdarknet.so)
 
 # System libs
 SET(SPECIAL_OS_LIBS "pthread")
+link_libraries(stdc++fs)
 
 # Optional definitions
-add_definitions(-std=c++14 -g -O3)
+add_definitions(-std=c++17 -g -O3)
 
 # Add sub directories
 add_subdirectory(test)

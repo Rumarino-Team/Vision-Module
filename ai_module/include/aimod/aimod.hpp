@@ -1,10 +1,28 @@
 #ifndef __AI_MODULE__
 #define __AI_MODULE__
-#include <DarkHelp.hpp>
+#include <experimental/filesystem>
+#include <yolo_v2_class.hpp>
 #include <opencv2/opencv.hpp>
-struct Object { //Built from DarkHelp::PredictionResult
+#include "zedmod/zedmod.hpp"
+struct DetectedObject { //Built from DarkHelp::PredictionResult
     cv::Rect bounding_box;
-    int obj_id;
+    int id;
+    const char* name;
     float distance;
+    cv::Point3f location;
+};
+
+class AI {
+    private:
+        bool recording;
+        std::vector<std::string>names;
+        cv::VideoWriter out_vid;
+        Detector* darknet;
+public:
+        AI(std::string input_path, bool record=false, std::string output_path=empty); //Loads Darkhelp
+        ~AI(); //Destruct AI object
+        std::vector<DetectedObject> detect(Video_Frame &frame, float minimum_confidence); //Detects object within a frame
+        std::vector<DetectedObject> detect(cv::Mat &frame, float minimum_confidence);
+        void close(); //Closes AI, if recording, loads a CV video
 };
 #endif
