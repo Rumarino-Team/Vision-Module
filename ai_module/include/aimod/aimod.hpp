@@ -1,5 +1,6 @@
 #ifndef __AI_MODULE__
 #define __AI_MODULE__
+#include <experimental/filesystem>
 #include <yolo_v2_class.hpp>
 #include <opencv2/opencv.hpp>
 #include "zedmod/zedmod.hpp"

@@ -4,23 +4,28 @@ AI::AI(std::string input_path, bool record, std::string output_path) {
     //Set recording flag
     recording = record;
 
-    //Set name of the directory from input path
-    //Vector of string to save tokens
-    std::vector <std::string> tokens;
-    //stringstream class charToString
-    std::stringstream charToString(input_path);
-    std::string intermediate;
-    //Tokenizing w.r.t. slash '/'
-    while(getline(charToString, intermediate, '/'))
-        if(!intermediate.empty() && intermediate != " ")
-            tokens.push_back(intermediate);
-    //The Folder Name should be the last token
-    dir_name = tokens.back();
+    std::string cfg, weights, names;
 
-    //Set path for each necessary file
-    std::string cfg = input_path + + "/" + dir_name + ".cfg";
-    std::string weights = input_path + "/weights/" + dir_name + "_best.weights";
-    std::string names = input_path + "/custom.names";
+    for (const auto & entry : std::experimental::filesystem::directory_iterator(input_path)) {
+        if (entry.path().has_extension()) {
+            if (entry.path().extension().string() == ".cfg") {
+                cfg = entry.path().string();
+            }
+            else if (entry.path().extension().string() == ".names") {
+                names = entry.path().string();
+            }
+        }
+        else if (entry.path().stem().string() == "weights") {
+            for (const auto & all_weights : std::experimental::filesystem::directory_iterator(entry.path())) {
+                std::string weight_str = all_weights.path().stem();
+                //TODO: for now we only look for the best weights, there must be a better way
+                if (weight_str.substr(weight_str.length() - 5) == "_best") {
+                    weights = all_weights.path().string();
+                    break;
+                }
+            }
+        }
+    }
 
     // Load darknet
     darknet = new Detector(cfg, weights);

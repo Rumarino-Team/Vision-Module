@@ -27,9 +27,10 @@ find_library(DARKNET_LIBRARY NAMES dark libdark.so libdarknet.so)
 
 # System libs
 SET(SPECIAL_OS_LIBS "pthread")
+link_libraries(stdc++fs)
 
 # Optional definitions
-add_definitions(-std=c++14 -g -O3)
+add_definitions(-std=c++17 -g -O3)
 
 # Add sub directories
 add_subdirectory(test)
