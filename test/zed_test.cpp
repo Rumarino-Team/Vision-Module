@@ -55,5 +55,5 @@ TEST(ZED, Save_Video) {
 }
 
 TEST(ZED, DISABLE_Save_Images) {
-    svo2img(playback_video, "media/");
+    //svo2img(playback_video, "media/");
 }

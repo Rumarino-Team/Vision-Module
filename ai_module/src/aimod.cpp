@@ -27,8 +27,7 @@ AI::AI(std::string input_path, bool record, std::string output_path) {
 
     if(recording) {
         //Start the CV Video Writer
-        //VideoWriter video("outcpp.avi",CV_FOURCC('M','J','P','G'),10, Size(frame_width,frame_height));
-        out_vid = cv::VideoWriter(output_path, cv::CAP_OPENCV_MJPEG, 10, cv::Size(1920, 1080));
+        out_vid = cv::VideoWriter(output_path, cv::VideoWriter::fourcc('M','P','E','G'), 15, cv::Size(1920, 1080));
     }
 }
 

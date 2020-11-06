@@ -14,11 +14,9 @@ bool file_exists_ai(const char* file) {
     return (stat (file, &buffer) == 0);
 }
 
-std::string in_video("media/test_input_video.svo");
+std::string in_video = "media/test_input_video.svo";
 
-//CHANGE THE INPUT PATH TO WHERE YOU HAVE THE RUBBER-DUCKY FOLDER!
 std::string input_path = "media/RUBBER-DUCKY";
-std::string out_path = "media/ai_output.avi";
 
 TEST(AI, File_Checker) {
     std::vector <std::string> tokens;
@@ -39,16 +37,13 @@ TEST(AI, File_Checker) {
 }
 
 TEST(AI, Video_Detection) {
-    AI ai(input_path, false, out_path);
+    AI ai(input_path);
 
     cv::VideoCapture cap("media/test_video.mp4");
     EXPECT_TRUE(cap.isOpened());
 
-    int frames = 0;
     while(true) {
         cv::Mat img;
-        frames++;
-        std::cout << frames << std::endl;
         if (cap.read(img)) {
             auto obj = ai.detect(img, 0.6);
         } else {
@@ -86,7 +81,7 @@ void camera_stream(ZED_Camera *cam, std::atomic<bool> &running) {
 
 TEST(AI, Multi_Threading) {
     ZED_Camera cam(in_video);
-    AI ai(input_path, false, out_path);
+    AI ai(input_path, true, "media/ai_output.avi");
     float minimum_confidence = 0.60;
 
     static std::atomic<bool> running { true };
@@ -113,7 +108,7 @@ TEST(AI, Multi_Threading) {
             std::cout << "\tObject Name: " << obj.name << std::endl;
             std::cout << "\tDistance: " << obj.distance << std::endl;
             std::cout << "\tLocation: (" << obj.location.x << ", " << obj.location.y << ", " << obj.location.z << " )\n" << std::endl;
-            //EXPECT_TRUE();
+            //EXPECT_TRUE(); avoid getting nan in distance, empty string names and other irregularities like those
         }
         std::cout << "}" << std::endl;
     }
