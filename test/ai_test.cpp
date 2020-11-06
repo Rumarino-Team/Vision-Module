@@ -38,12 +38,31 @@ TEST(AI, File_Checker) {
     EXPECT_TRUE(file_exists_ai(names.c_str()));
 }
 
+TEST(AI, Video_Detection) {
+    AI ai(input_path, false, out_path);
+
+    cv::VideoCapture cap("media/test_video.mp4");
+    EXPECT_TRUE(cap.isOpened());
+
+    int frames = 0;
+    while(true) {
+        cv::Mat img;
+        frames++;
+        std::cout << frames << std::endl;
+        if (cap.read(img)) {
+            auto obj = ai.detect(img, 0.6);
+        } else {
+            break;
+        }
+    }
+
+}
+
 // Declare thread functions
 // The multithreading here is simple and technically linear
 // But since where only testing the AI part this is ok
 // Multithreading is in response to ZED and Darknet not being able to run in the same thread
 Video_Frame threaded_frame;
-std::vector<DetectedObject> threaded_obj;
 std::mutex frame_mutex;
 std::condition_variable new_frame;
 std::condition_variable new_detect;
@@ -65,7 +84,7 @@ void camera_stream(ZED_Camera *cam, std::atomic<bool> &running) {
     }
 }
 
-TEST(AI, Run_Video) {
+TEST(AI, Multi_Threading) {
     ZED_Camera cam(in_video);
     AI ai(input_path, false, out_path);
     float minimum_confidence = 0.60;
@@ -79,7 +98,7 @@ TEST(AI, Run_Video) {
 
         std::unique_lock<std::mutex> frame_lock(frame_mutex);
         new_frame.wait(frame_lock);
-        threaded_obj = ai.detect(threaded_frame, minimum_confidence);
+        std::vector<DetectedObject> threaded_obj = ai.detect(threaded_frame, minimum_confidence);
         frame_lock.unlock();
 
         auto stop = std::chrono::high_resolution_clock::now();
