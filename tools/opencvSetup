@@ -54,9 +54,11 @@ sudo apt-get install -y libgphoto2-dev libeigen3-dev libhdf5-dev doxygen
 echo "Download OpenCV"
 cd
 wget -O opencv.zip https://github.com/opencv/opencv/archive/4.2.0.zip
+sudo rm -r opencv-4.2.0
 unzip -o opencv.zip
 rm opencv.zip
 wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/4.2.0.zip
+sudo rm -r opencv_contrib-4.2.0
 unzip -o opencv_contrib.zip
 rm opencv_contrib.zip
 
