@@ -69,6 +69,20 @@ const char* ErrorToString(sl::ERROR_CODE error) {
     }
 }
 
+Video_Frame::Video_Frame() = default;
+
+Video_Frame::Video_Frame(cv::Mat &image, cv::Mat &depth_map, cv::Mat &point_cloud) {
+    this->image = image;
+    this->depth_map = depth_map;
+    this->point_cloud = point_cloud;
+}
+
+Video_Frame::Video_Frame(Video_Frame &frame) {
+    image = frame.image.clone();
+    depth_map = frame.depth_map.clone();
+    point_cloud = frame.point_cloud.clone();
+}
+
 ZED_Camera::ZED_Camera(bool record, const std::string &recording_out, Video_Quality quality) {
     sl::RESOLUTION res;
     int fps;
