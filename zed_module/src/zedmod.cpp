@@ -78,6 +78,10 @@ Video_Frame::Video_Frame(cv::Mat &image, cv::Mat &depth_map, cv::Mat &point_clou
 }
 
 Video_Frame::Video_Frame(Video_Frame &frame) {
+    this->copy(frame);
+}
+
+void Video_Frame::copy(Video_Frame &frame) {
     image = frame.image.clone();
     depth_map = frame.depth_map.clone();
     point_cloud = frame.point_cloud.clone();

@@ -25,6 +25,12 @@ struct Video_Frame {
      * @param frame
      */
     Video_Frame(Video_Frame &frame);
+    /**
+     * Copy over the Frame's values to this one.
+     *
+     * @param frame
+     */
+    void copy(Video_Frame &frame);
     // Original left camera frame
     cv::Mat image;
     // Each pixel contains a float32 determining pixel distance
