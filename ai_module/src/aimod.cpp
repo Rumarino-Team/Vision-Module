@@ -51,9 +51,9 @@ AI::AI(std::string input_path, bool record, std::string output_path) {
     }
 }
 
-std::vector<DetectedObject> AI::detect(Video_Frame &frame, float minimum_confidence) {
+DetectedObjects AI::detect(Video_Frame &frame, float minimum_confidence) {
     //Create the resulting struct
-    std::vector<DetectedObject> results;
+    DetectedObjects results;
 
     // Image where detected structures are written in
     cv::Mat annotated_img;
@@ -100,9 +100,9 @@ std::vector<DetectedObject> AI::detect(Video_Frame &frame, float minimum_confide
     return results;
 }
 
-std::vector<DetectedObject> AI::detect(cv::Mat &frame, float minimum_confidence) {
+DetectedObjects AI::detect(cv::Mat &frame, float minimum_confidence) {
     //Create the resulting struct
-    std::vector<DetectedObject> results;
+    DetectedObjects results;
 
     // Image where detected structures are written in
     cv::Mat annotated_img;
