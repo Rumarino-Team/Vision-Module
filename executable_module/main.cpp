@@ -7,18 +7,23 @@
 #include "aimod/aimod.hpp"
 #include "apimod/apimod.hpp"
 
-void camera_stream(ZED_Camera &cam, Video_Frame &frame, std::mutex &frame_mutex, std::condition_variable &new_frame, std::atomic<bool> &running){
+// Thread variables
+std::mutex frame_mutex, obj_mutex;
+std::condition_variable new_frame, new_obj;
+
+void camera_stream(ZED_Camera &cam, Video_Frame &frame, std::atomic<bool> &running){
     // Stop the thread properly
     while (running) {
+        Video_Frame frame_update = cam.update();
         std::unique_lock<std::mutex> lock(frame_mutex);
-        frame = cam.update();
+        frame.copy(frame_update);
         lock.unlock();
         new_frame.notify_one();
     }
     cam.close();
 }
 
-void ai_stream(AI &ai, std::vector<DetectedObject> &objs, float confidence, Video_Frame &frame, std::mutex &obj_mutex, std::mutex &frame_mutex, std::condition_variable &new_obj, std::condition_variable &new_frame, std::atomic<bool> &running) {
+void ai_stream(AI &ai, float confidence, DetectedObjects &objs, Video_Frame &frame, std::atomic<bool> &running) {
     // Stop the thread properly
     while (running) {
         // Handle new frame
@@ -39,5 +44,31 @@ void ai_stream(AI &ai, std::vector<DetectedObject> &objs, float confidence, Vide
 
 int main(int argc, char* argv[]) {
     //TODO: use arguments to initialize the ai and zed
+    ZED_Camera cam(false);
+    Video_Frame frame;
 
+    AI ai("../test/media/RUBBER-DUCKY", true, "ai_output.avi");
+    DetectedObjects objs;
+    float conf = 0.66;
+    // Use argument variables
+
+    static std::atomic<bool> running = true;
+
+    // Since threads copy arguments we must pass them by reference.
+    std::thread camera_thread(camera_stream, std::ref(cam), std::ref(frame), std::ref(running));
+    std::thread ai_thread(ai_stream, std::ref(ai), conf, std::ref(objs), std::ref(frame), std::ref(running));
+
+    int i = 0;
+    while(true) {
+        // API cases go here
+        i++;
+
+        // When receiving the close message
+        if (i > 1000) {
+            running = false;
+            camera_thread.join();
+            ai_thread.join();
+            break;
+        }
+    }
 }
