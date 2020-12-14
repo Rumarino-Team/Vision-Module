@@ -37,7 +37,10 @@ TEST(AI, File_Checker) {
 }
 
 TEST(AI, Video_Detection) {
+    // For just testing the video
     AI ai(input_path);
+    // For testing and creating an output video
+    //AI ai(input_path, true, "media/test_detection_video.mp4", 30)
 
     cv::VideoCapture cap("media/test_video.mp4");
     EXPECT_TRUE(cap.isOpened());
