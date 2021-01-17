@@ -15,4 +15,5 @@ target_link_libraries(${PROJECT_NAME}
                         ${SPECIAL_OS_LIBS}
                         ${OpenCV_LIBS}
                         ${DARKNET_LIBRARY}
+                        #${DARK_LIBS}
                         ${CUDA_LIBRARIES} ${CUDA_npps_LIBRARY})

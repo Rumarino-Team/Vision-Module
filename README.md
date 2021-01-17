@@ -31,34 +31,30 @@ Head over to the [StereoLabs](https://www.stereolabs.com/developers/release/) we
 
 ## Setting up Darknet
 
-First clone [AleceyAB's Darknet repo](https://github.com/AlexeyAB/darknet)
-```
-$ git clone https://github.com/AlexeyAB/darknet.git
-```
-
-Inside open the included Makefile and change GPU, CUDNN and OPENCV to 1 for better GPU performance. Also set LIBSO flag to 1 since we'll need a library to be built in order to use the program in out repo.
-
-Once this is done you must go over to line 66 and replace the NVCC variable with
-``` 
-NVCC=/usr/local/cuda/bin/nvcc
+First clone [This Darknet repo](https://github.com/FloppyDisck/darknet)
+```bash
+git clone https://github.com/FloppyDisck/darknet.git
 ```
 
-Then just do
+Then compile and copy the files over to local
+```bash
+make -j5
+sudo cp libdarknet.so /usr/local/lib
+sudo cp include/yolo_v2_class.hpp /usr/local/include
 ```
-$ make
-```
-and Darknet should compile.
-
-## Setting up Darkhelp
-
-Darkhelp is a C++ wrapper for Darknet that also changes its image handling type to officially use OpenCV.
-To install follow [these instructions](https://www.ccoderun.ca/darkhelp/api/Building.html#Linux).
 
 ## Compiling the project
 
 Once all the dependencies are setup head over to the root directory and create a build directory where the program will be compiled in:
+```bash
+mkdir build-release
+cd build-release
+cmake -DCMAKE_BUILD_TYPE=Release ..
 ```
-$ mkdir build
-$ cd build
-$ cmake ..
+
+Testers are automatically compiled when using Debug build type
+```bash
+mkdir build-debug
+cd build-debug
+cmake -DCMAKE_BUILD_TYPE=Debug ..
 ```
