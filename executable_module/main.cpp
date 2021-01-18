@@ -5,10 +5,13 @@
 
 #include "zedmod/zedmod.hpp"
 #include "aimod/aimod.hpp"
-#include "apimod/apimod.hpp"
+#include "httpapimod/apimod.hpp"
 
 // Thread variables
 std::mutex frame_mutex, obj_mutex;
+
+// Used to handle new frames
+// NOTE: new_obj currently not used
 std::condition_variable new_frame, new_obj;
 
 void camera_stream(ZED_Camera &cam, Video_Frame &frame, std::atomic<bool> &running){
@@ -51,24 +54,22 @@ int main(int argc, char* argv[]) {
     DetectedObjects objs;
     float conf = 0.66;
     // Use argument variables
-
     static std::atomic<bool> running = true;
+
+    //Initialize API
+    API api(obj_mutex, objs);
 
     // Since threads copy arguments we must pass them by reference.
     std::thread camera_thread(camera_stream, std::ref(cam), std::ref(frame), std::ref(running));
     std::thread ai_thread(ai_stream, std::ref(ai), conf, std::ref(objs), std::ref(frame), std::ref(running));
 
-    int i = 0;
     while(true) {
         // API cases go here
-        i++;
+        api.start("0.0.0.0", 8080);
 
-        // When receiving the close message
-        if (i > 1000) {
-            running = false;
-            camera_thread.join();
-            ai_thread.join();
-            break;
-        }
+        running = false;
+        camera_thread.join();
+        ai_thread.join();
+        break;
     }
 }

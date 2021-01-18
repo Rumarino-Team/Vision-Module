@@ -26,6 +26,10 @@ include_directories(${OpenCV_INLCUDE_DIRS})
 find_library(DARKNET_LIBRARY NAMES dark libdark.so libdarknet.so)
 #find_package(dark REQUIRED)
 
+# Setup HTTP libs
+find_package(httplib REQUIRED)
+find_package(nlohmann_json 3.2.0 REQUIRED)
+
 # System libs
 SET(SPECIAL_OS_LIBS "pthread")
 link_libraries(stdc++fs)
@@ -36,7 +40,7 @@ add_definitions(-std=c++17 -g -O3)
 # Add sub directories
 add_subdirectory(zed_module)
 add_subdirectory(ai_module)
-add_subdirectory(api_module)
+add_subdirectory(http_api_module)
 add_subdirectory(executable_module)
 
 option(RUN_TESTS "Build the tests" off)

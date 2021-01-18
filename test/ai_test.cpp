@@ -111,7 +111,8 @@ TEST(AI, Multi_Threading) {
             std::cout << "\tObject Name: " << obj.name << std::endl;
             std::cout << "\tDistance: " << obj.distance << std::endl;
             std::cout << "\tLocation: (" << obj.location.x << ", " << obj.location.y << ", " << obj.location.z << " )\n" << std::endl;
-            //EXPECT_TRUE(); avoid getting nan in distance, empty string names and other irregularities like those
+            //TODO: avoid getting nan in distance, empty string names and other irregularities like those
+            //EXPECT_TRUE();
         }
         std::cout << "}" << std::endl;
     }

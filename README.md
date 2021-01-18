@@ -43,6 +43,26 @@ sudo cp libdarknet.so /usr/local/lib
 sudo cp include/yolo_v2_class.hpp /usr/local/include
 ```
 
+## Setting up the API dependencies
+
+Install [cpp-httplib](https://github.com/yhirose/cpp-httplib)
+```bash
+git clone https://github.com/yhirose/cpp-httplib.git
+cd cpp-httplib
+mkdir -p build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DHTTPLIB_COMPILE=on -DBUILD_SHARED_LIBS=on ..
+sudo cmake --build . --target install
+```
+
+Install [nlohmann's json](https://github.com/nlohmann/json)
+```bash
+git clone https://github.com/nlohmann/json.git
+cd json
+mkdir -p build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+sudo make install -j5
+```
+
 ## Compiling the project
 
 Once all the dependencies are setup head over to the root directory and create a build directory where the program will be compiled in:
