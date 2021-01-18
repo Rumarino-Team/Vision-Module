@@ -108,11 +108,11 @@ ZED_Camera::ZED_Camera(bool record, const std::string &recording_out, Video_Qual
 }
 
 ZED_Camera::ZED_Camera(bool record, sl::RESOLUTION res, int fps, const std::string &recording_out) {
-    this->init(record, std::string(), recording_out, res, fps);
+    this->init(record, empty, recording_out, res, fps);
 }
 
 ZED_Camera::ZED_Camera(const std::string &playback_video) {
-    this->init(false, playback_video, std::string(), sl::RESOLUTION::HD1080, 30);
+    this->init(false, playback_video, empty, sl::RESOLUTION::HD1080, 30);
 }
 
 void ZED_Camera::init(bool record, const std::string &playback_video, const std::string &recording_out, sl::RESOLUTION res, int fps) {
