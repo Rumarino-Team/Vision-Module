@@ -7,6 +7,30 @@
  * To prevent using the Zed API outside the ZED_Camera, everything is converted to OpenCV format
  */
 struct Video_Frame {
+    /**
+     * Initialize empty frame
+     */
+    Video_Frame();
+    /**
+     * Initialize frame by copying the images
+     *
+     * @param image
+     * @param depth_map
+     * @param point_cloud
+     */
+    Video_Frame(cv::Mat &image, cv::Mat &depth_map, cv::Mat &point_cloud);
+    /**
+     * Initialize frame by copying another frame
+     *
+     * @param frame
+     */
+    Video_Frame(Video_Frame &frame);
+    /**
+     * Copy over the Frame's values to this one.
+     *
+     * @param frame
+     */
+    void copy(Video_Frame &frame);
     // Original left camera frame
     cv::Mat image;
     // Each pixel contains a float32 determining pixel distance

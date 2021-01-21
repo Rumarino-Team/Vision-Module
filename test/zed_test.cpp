@@ -50,7 +50,7 @@ TEST(ZED, Live_video) {
     cam.close();
 }
 
-TEST(ZED, Save_Video) {
+TEST(ZED, Save_Live_Video) {
     EXPECT_TRUE(file_exists(video_save.c_str()));
 }
 

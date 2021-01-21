@@ -37,7 +37,10 @@ TEST(AI, File_Checker) {
 }
 
 TEST(AI, Video_Detection) {
+    // For just testing the video
     AI ai(input_path);
+    // For testing and creating an output video
+    //AI ai(input_path, true, "media/test_detection_video.mp4", 30)
 
     cv::VideoCapture cap("media/test_video.mp4");
     EXPECT_TRUE(cap.isOpened());
@@ -84,7 +87,7 @@ TEST(AI, Multi_Threading) {
     AI ai(input_path, true, "media/ai_output.avi");
     float minimum_confidence = 0.60;
 
-    static std::atomic<bool> running { true };
+    static std::atomic<bool> running = true;
     std::thread camera_thread(camera_stream, &cam, std::ref(running));
 
     for (int i=0; i < 30; i++) {
@@ -93,7 +96,7 @@ TEST(AI, Multi_Threading) {
 
         std::unique_lock<std::mutex> frame_lock(frame_mutex);
         new_frame.wait(frame_lock);
-        std::vector<DetectedObject> threaded_obj = ai.detect(threaded_frame, minimum_confidence);
+        DetectedObjects threaded_obj = ai.detect(threaded_frame, minimum_confidence);
         frame_lock.unlock();
 
         auto stop = std::chrono::high_resolution_clock::now();
@@ -102,13 +105,14 @@ TEST(AI, Multi_Threading) {
         std::cout << "AI detection is going at " << 1000000/ai_time_per_frame << " fps." << std::endl;
 
         std::cout << "Objects detected at frame " << i << " \n{" <<std::endl;
-        for (DetectedObject obj : threaded_obj) {
+        for (DetectedObject &obj : threaded_obj) {
             std::cout << "\tBounding box: ("<<obj.bounding_box.x<<", "<<obj.bounding_box.y<<") w: "<<obj.bounding_box.width<<" h: " <<obj.bounding_box.height<< std::endl;
             std::cout << "\tObject ID: "<< obj.id << std::endl;
             std::cout << "\tObject Name: " << obj.name << std::endl;
             std::cout << "\tDistance: " << obj.distance << std::endl;
             std::cout << "\tLocation: (" << obj.location.x << ", " << obj.location.y << ", " << obj.location.z << " )\n" << std::endl;
-            //EXPECT_TRUE(); avoid getting nan in distance, empty string names and other irregularities like those
+            //TODO: avoid getting nan in distance, empty string names and other irregularities like those
+            //EXPECT_TRUE();
         }
         std::cout << "}" << std::endl;
     }
