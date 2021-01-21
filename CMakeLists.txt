@@ -42,6 +42,7 @@ add_subdirectory(zed_module)
 add_subdirectory(ai_module)
 add_subdirectory(http_api_module)
 add_subdirectory(executable_module)
+add_subdirectory(logger_module)
 
 option(RUN_TESTS "Build the tests" off)
 

@@ -43,7 +43,7 @@ file(GLOB HEADERS *.hpp)
 
 project (tests)
 
-ADD_EXECUTABLE(${PROJECT_NAME} ${SRCS} ${HEADERS})
+ADD_EXECUTABLE(${PROJECT_NAME} ${SRCS} ${HEADERS} ../logger_module/src/loggermod.cpp ../logger_module/include/loggermod/loggermod.h)
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
         libgtest
