@@ -1,10 +1,10 @@
-//
-// Created by hectormiranda on 1/21/21.
-//
+#ifndef __LOGGER_MOD_
+#define __LOGGER_MOD_
+#include <string>
+#include <fstream>
+#include <ctime>
+#include <experimental/filesystem>
 
-#ifndef VISION_LOGGERMOD_H
-#define VISION_LOGGERMOD_H
+void RUM_log(const std::string& type, const std::string& place, const std::string& msg);
 
-void RUM_log(std::string msg);
-
-#endif //VISION_LOGGERMOD_H
+#endif

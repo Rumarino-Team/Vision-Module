@@ -12,6 +12,7 @@ target_include_directories( ${PROJECT_NAME}
 # Required libs for linking
 target_link_libraries(${PROJECT_NAME}
                         mod::zed
+                        mod::logger
                         ${SPECIAL_OS_LIBS}
                         ${OpenCV_LIBS}
                         ${DARKNET_LIBRARY}
