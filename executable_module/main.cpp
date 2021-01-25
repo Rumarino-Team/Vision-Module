@@ -134,7 +134,7 @@ int main(int argc, const char* argv[]) {
         else if (arg == "-c" || arg == "--confidence") {
             confidence_percent = std::stoi(std::string(argv[++i]));
         }
-        else if (arg == "-ip") {
+        else if (arg == "-ip" || arg == "--ip") {
             ip = argv[++i];
         }
         else if (arg == "-p" || arg == "--port") {
