@@ -151,3 +151,8 @@ if you please.
 # The port in which the server will be listening at
 [-p, --port] ${port}
 ```
+
+#### Using the Python library
+For a general explanation of how the library works refer to the example implementation inside the library itself.
+
+The kwargs are the same as the verbose versions of the executable args without the "--" prefix.
