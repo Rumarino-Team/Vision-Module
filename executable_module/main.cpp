@@ -142,6 +142,11 @@ int main(int argc, const char* argv[]) {
         }
     }
 
+    if(model.empty()) {
+        std::cout << "No YOLO model specified!" << std::endl;
+        return 0;
+    }
+
     // Initialize ZED Cam
     std::shared_ptr<ZED_Camera> cam_ptr;
     if (live_zed) {
