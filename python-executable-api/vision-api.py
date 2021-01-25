@@ -89,9 +89,8 @@ if __name__ == '__main__':
     test_server.start()
 
     print("Waiting for server to open")
-    while True:
-        if test_server.open():
-            break
+
+    test_server.wait()
 
     print("Server is open")
 
