@@ -1,4 +1,4 @@
-project(executable_module)
+project(vision_http_server)
 
 # Create the executable
 add_executable(${PROJECT_NAME} main.cpp)
