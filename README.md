@@ -5,7 +5,8 @@ In order to successfully run the program you will need to install the following;
 2. OpenCV
 3. ZED SDK
 4. Darknet
-5. Darkhelp
+5. cpp-httplib
+6. nlohmann's json
 
 ## Setting up CUDA
 
