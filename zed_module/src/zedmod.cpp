@@ -8,6 +8,7 @@
  */
 cv::Mat zedMat2cvMat(sl::Mat input) {
     // Mapping between MAT_TYPE and CV_TYPE
+    //PLOGI << "ZED: Converting ZED mat to CV mat.";
     int cv_type = -1;
     switch (input.getDataType()) {
         case sl::MAT_TYPE::F32_C1: cv_type = CV_32FC1; break;
