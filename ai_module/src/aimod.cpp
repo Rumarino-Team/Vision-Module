@@ -121,11 +121,15 @@ DetectedObjects AI::detect(Video_Frame &frame, float minimum_confidence) {
         //Get mid point from of the predicted image and get the distance from the depth image
         //Float taken from depth map is distance in millimeters (mm)
         cv::Point2f mid_point = cv::Point2f(result.bounding_box.x + result.bounding_box.width/2, result.bounding_box.y + result.bounding_box.height/2);
+        PLOGI << "AI: Getting result's distance";
         result.distance = frame.depth_map.at<float>(mid_point);
 
         //Saving the 3D point on the struct
+        PLOGI << "AI: Getting result's 3D point.x";
         result.location.x = frame.point_cloud.at<cv::Vec4f>(mid_point)[0];
+        PLOGI << "AI: Getting result's 3D point.y";
         result.location.y = frame.point_cloud.at<cv::Vec4f>(mid_point)[1];
+        PLOGI << "AI: Getting result's 3D point.z";
         result.location.z = frame.point_cloud.at<cv::Vec4f>(mid_point)[2];
     }
 
