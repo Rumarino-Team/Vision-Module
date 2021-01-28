@@ -50,6 +50,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
         mod::zed
         mod::ai
         mod::http-api
+        mod::logger
         )
 
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
