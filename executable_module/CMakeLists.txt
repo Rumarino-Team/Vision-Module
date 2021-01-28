@@ -1,4 +1,4 @@
-project(executable_module)
+project(vision_http_server)
 
 # Create the executable
 add_executable(${PROJECT_NAME} main.cpp)
@@ -7,5 +7,5 @@ add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME}
     mod::zed
     mod::ai
-    mod::api
+    mod::http-api
 )
