@@ -5,6 +5,6 @@
 #include <plog/Log.h>
 
 void initPLOG();
-void pLog(std::string log);
+void pLog(const std::string& log);
 
 #endif

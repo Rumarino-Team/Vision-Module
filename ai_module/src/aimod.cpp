@@ -4,6 +4,7 @@ AI::AI(std::string input_path, bool record, std::string output_path, int fps) {
     //Set recording flag
     recording = record;
 
+    PLOGI << "AI: Finding paths for cfg, weights and .names files...";
     std::string cfg, weights, names_path;
 
     //Identify the files inside the folder
@@ -11,9 +12,11 @@ AI::AI(std::string input_path, bool record, std::string output_path, int fps) {
         if (entry.path().has_extension()) {
             if (entry.path().extension().string() == ".cfg") {
                 cfg = entry.path().string();
+                PLOGI << "AI: Found path for the cfg file...";
             }
             else if (entry.path().extension().string() == ".names") {
                 names_path = entry.path().string();
+                PLOGI << "AI: Found path for the .names file...";
             }
         }
         else if (entry.path().stem().string() == "weights") {
@@ -22,17 +25,20 @@ AI::AI(std::string input_path, bool record, std::string output_path, int fps) {
                 //TODO: for now we only look for the best weights, there must be a better way
                 if (weight_str.substr(weight_str.length() - 5) == "_best") {
                     weights = all_weights.path().string();
+                    PLOGI << "AI: Found path for weights file...";
                     break;
                 }
             }
         }
     }
+    PLOGI << "AI: Finished Finding paths for cfg, weights and .names files.";
 
+    PLOGI <<"AI: Getting the names inside the .names file.";
     //Get the names inside the file
     std::ifstream names_file;
     names_file.open(names_path.c_str());
     if(!names_file) {
-        std::cout << "[AI] [ERROR] No .nammes file found";
+        std::cout << "[AI] [ERROR] No .names file found";
     }
     else {
         std::string name;
@@ -41,13 +47,18 @@ AI::AI(std::string input_path, bool record, std::string output_path, int fps) {
             names.push_back(name);
         }
     }
+    PLOGI << "AI: Loaded all names inside .names file.";
 
+    PLOGI << "AI: Loading darknet...";
     // Load darknet
     darknet = new Detector(cfg, weights);
+    PLOGI << "AI: Finished loading darknet.";
 
     if(recording) {
         //Start the CV Video Writer
+        PLOGI << "AI: Loading Video Writer...";
         out_vid = cv::VideoWriter(output_path, cv::VideoWriter::fourcc('M','P','E','G'), fps, cv::Size(1920, 1080));
+        PLOGI << "AI: Finished loading Video Writer.";
     }
 }
 
@@ -57,18 +68,26 @@ DetectedObjects AI::detect_objects(cv::Mat &frame, float minimum_confidence) {
 
     // Image where detected structures are written in
     cv::Mat annotated_img;
-    if(recording)
+    if(recording){
+        PLOGI << "AI: Converting one image to another color space...";
         cv::cvtColor(frame, annotated_img, cv::COLOR_BGRA2BGR);
+        PLOGI << "AI: Finished converting one image to another color space.";
+    }
+
 
     //Predict items from the frame
+    PLOGI << "AI: Getting predictions from darknet.";
     auto predictions = darknet->detect(frame, minimum_confidence);
 
     for(auto &prediction : predictions) {
         DetectedObject result;
 
+        PLOGI << "AI: Saving result's bounding box.";
         result.bounding_box = cv::Rect(prediction.x, prediction.y, prediction.w, prediction.h);
+        PLOGI << "AI: Saving result's id.";
         result.id = prediction.obj_id;
         // Get the name of the detected object; leave it empty if not found
+        PLOGI << "AI: Saving result's name.";
         if (prediction.obj_id < names.size()) {
             result.name = names[prediction.obj_id].c_str();
         }
@@ -76,16 +95,21 @@ DetectedObjects AI::detect_objects(cv::Mat &frame, float minimum_confidence) {
             result.name = "";
         }
 
-        if(recording)
+        if(recording){
             cv::rectangle(annotated_img, result.bounding_box, cv::Scalar(0,255,0), 4, 8, 0);
+            PLOGI << "AI: Drawing the result's bounding box on the frame.";
+        }
 
+        PLOGI << "AI: Pushing back result on current frame to results array.";
         results.push_back(result);
     }
 
     if(recording){
+        PLOGI << "AI: Recording the annotated image to recording video.";
         out_vid.write(annotated_img);
     }
 
+    PLOGI << "AI: Returning result.";
     return results;
 }
 
@@ -109,13 +133,16 @@ DetectedObjects AI::detect(Video_Frame &frame, float minimum_confidence) {
 }
 
 DetectedObjects AI::detect(cv::Mat &frame, float minimum_confidence) {
+    PLOGI << "AI: Detecting objects with a minimum confidence of: ";
     return this->detect_objects(frame, minimum_confidence);
 }
 
 void AI::close() {
     if(recording){
+        PLOGI << "AI: Ending the video recording.";
         out_vid.release();
     }
+    PLOGI << "AI: Closing AI.";
 }
 
 AI::~AI() {

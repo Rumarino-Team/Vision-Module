@@ -4,7 +4,7 @@
 #include <yolo_v2_class.hpp>
 #include <opencv2/opencv.hpp>
 #include "zedmod/zedmod.hpp"
-#include "loggermod/loggermod.h"
+#include "loggermod/loggermod.hpp"
 
 /**
  * Contains all object information

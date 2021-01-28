@@ -5,6 +5,7 @@
 #include <mutex>
 #include <atomic>
 #include "aimod/aimod.hpp"
+#include "loggermod/loggermod.hpp"
 
 class API {
 public:
