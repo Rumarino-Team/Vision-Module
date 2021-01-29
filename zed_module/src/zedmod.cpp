@@ -97,7 +97,7 @@ ZED_Camera::ZED_Camera(bool record, const std::string &recording_out, Video_Qual
     sl::RESOLUTION res;
     int fps;
 
-    PLOGI << "ZED: Choosing camera quality.";
+    PLOGI << "ZED: Choosing camera quality. Quality: " << quality;
     switch (quality) {
         case Video_Quality::HD2K_15fps: res = sl::RESOLUTION::HD2K; fps=15; break;
         case Video_Quality::HD1080_15fps: res = sl::RESOLUTION::HD1080; fps=15; break;
@@ -257,7 +257,7 @@ void svo2img(const std::string &playback_video, const std::string &image_save_pa
         }
         else if (zed.grab() == sl::ERROR_CODE::END_OF_SVOFILE_REACHED) {
             // When video ends, stop
-            PLOGI << "ZED: Video as ended. Stopping video.";
+            PLOGI << "ZED: Video has ended. Stopping video.";
             break;
         }
     }

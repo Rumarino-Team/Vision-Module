@@ -12,11 +12,11 @@ AI::AI(std::string input_path, bool record, std::string output_path, int fps) {
         if (entry.path().has_extension()) {
             if (entry.path().extension().string() == ".cfg") {
                 cfg = entry.path().string();
-                PLOGI << "AI: Found path for the cfg file...";
+                PLOGI << "AI: Found path for the cfg file... " << cfg;
             }
             else if (entry.path().extension().string() == ".names") {
                 names_path = entry.path().string();
-                PLOGI << "AI: Found path for the .names file...";
+                PLOGI << "AI: Found path for the .names file... " << names_path;
             }
         }
         else if (entry.path().stem().string() == "weights") {
@@ -25,7 +25,7 @@ AI::AI(std::string input_path, bool record, std::string output_path, int fps) {
                 //TODO: for now we only look for the best weights, there must be a better way
                 if (weight_str.substr(weight_str.length() - 5) == "_best") {
                     weights = all_weights.path().string();
-                    PLOGI << "AI: Found path for weights file...";
+                    PLOGI << "AI: Found path for weights file... " << weights;
                     break;
                 }
             }
@@ -56,7 +56,7 @@ AI::AI(std::string input_path, bool record, std::string output_path, int fps) {
 
     if(recording) {
         //Start the CV Video Writer
-        PLOGI << "AI: Loading Video Writer...";
+        PLOGI << "AI: Loading Video Writer... Output path: " + output_path;
         out_vid = cv::VideoWriter(output_path, cv::VideoWriter::fourcc('M','P','E','G'), fps, cv::Size(1920, 1080));
         PLOGI << "AI: Finished loading Video Writer.";
     }
@@ -137,7 +137,7 @@ DetectedObjects AI::detect(Video_Frame &frame, float minimum_confidence) {
 }
 
 DetectedObjects AI::detect(cv::Mat &frame, float minimum_confidence) {
-    PLOGI << "AI: Detecting objects with a minimum confidence of: ";
+    PLOGI << "AI: Detecting objects with a minimum confidence of: " << minimum_confidence;
     return this->detect_objects(frame, minimum_confidence);
 }
 
