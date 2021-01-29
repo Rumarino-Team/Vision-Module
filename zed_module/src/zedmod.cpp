@@ -97,7 +97,7 @@ ZED_Camera::ZED_Camera(bool record, const std::string &recording_out, Video_Qual
     sl::RESOLUTION res;
     int fps;
 
-    PLOGI << "ZED: Choosing camera quality. Quality: " << quality;
+    PLOGI << "ZED: Choosing camera quality.";
     switch (quality) {
         case Video_Quality::HD2K_15fps: res = sl::RESOLUTION::HD2K; fps=15; break;
         case Video_Quality::HD1080_15fps: res = sl::RESOLUTION::HD1080; fps=15; break;

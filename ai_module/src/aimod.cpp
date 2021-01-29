@@ -12,11 +12,11 @@ AI::AI(std::string input_path, bool record, std::string output_path, int fps) {
         if (entry.path().has_extension()) {
             if (entry.path().extension().string() == ".cfg") {
                 cfg = entry.path().string();
-                PLOGI << "AI: Found path for the cfg file... " << cfg;
+                PLOGI << "AI: Found path for the cfg file... " + cfg;
             }
             else if (entry.path().extension().string() == ".names") {
                 names_path = entry.path().string();
-                PLOGI << "AI: Found path for the .names file... " << names_path;
+                PLOGI << "AI: Found path for the .names file... " + names_path;
             }
         }
         else if (entry.path().stem().string() == "weights") {
@@ -25,7 +25,7 @@ AI::AI(std::string input_path, bool record, std::string output_path, int fps) {
                 //TODO: for now we only look for the best weights, there must be a better way
                 if (weight_str.substr(weight_str.length() - 5) == "_best") {
                     weights = all_weights.path().string();
-                    PLOGI << "AI: Found path for weights file... " << weights;
+                    PLOGI << "AI: Found path for weights file... " + weights;
                     break;
                 }
             }
