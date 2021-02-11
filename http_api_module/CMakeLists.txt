@@ -12,5 +12,6 @@ target_include_directories( ${PROJECT_NAME}
 # Required libs for linking
 target_link_libraries(${PROJECT_NAME}
         mod::ai
+        mod::logger
         httplib::httplib
         nlohmann_json::nlohmann_json)

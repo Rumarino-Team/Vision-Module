@@ -17,6 +17,7 @@ std::condition_variable new_frame, new_obj;
 
 void camera_stream(ZED_Camera &cam, Video_Frame &frame, std::atomic<bool> &running){
     // Stop the thread properly
+    PLOGI << "Stopping CAMERA_STREAM thread properly...";
     while (running) {
         std::unique_lock<std::mutex> lock(frame_mutex);
         frame = cam.update();
@@ -26,10 +27,12 @@ void camera_stream(ZED_Camera &cam, Video_Frame &frame, std::atomic<bool> &runni
         std::this_thread::sleep_for(std::chrono::microseconds (1));
     }
     cam.close();
+    PLOGI << "Stopped CAMERA_STREAM thread.";
 }
 
 void ai_stream(AI &ai, float confidence, DetectedObjects &objs, Video_Frame &frame, std::atomic<bool> &running) {
     // Stop the thread properly
+    PLOGI << "Stopping AI_STREAM thread properly...";
     while (running) {
         // Handle new frame
         std::unique_lock<std::mutex> frame_lock(frame_mutex);
@@ -45,6 +48,7 @@ void ai_stream(AI &ai, float confidence, DetectedObjects &objs, Video_Frame &fra
         obj_lock.unlock();
     }
     ai.close();
+    PLOGI << "Stopped AI_STREAM thread.";
 }
 
 void print_help() {
@@ -89,60 +93,77 @@ int main(int argc, const char* argv[]) {
     // API Arguments
     const char* ip = "0.0.0.0";
     int port = 8080;
+    // Logger Init
+    initPLOG();
 
     for (int i = 1; i < argc; i++) {
         std::string arg = std::string(argv[i]);
         if (arg == "-h" || arg == "--help") {
+            PLOGI << "Executing -h command.";
             print_help();
             return 0;
         }
         else if (arg == "-zr" || arg == "--zed_record") {
+            PLOGI << "ARG given for Zed Recording is TRUE.";
             live_zed = true;
             z_out = argv[++i];}
         else if (arg == "-res" || arg == "--resolution") {
             std::string res = argv[++i];
             if (res == "1080") {
+                PLOGI << "ARG given for setting ZED RESOLUTION to HD1080";
                 z_res = sl::RESOLUTION::HD1080;
             }
             else if (res == "2k") {
+                PLOGI << "ARG given for setting ZED RESOLUTION to HD2k";
                 z_res = sl::RESOLUTION::HD2K;
             }
             else if (res == "720") {
+                PLOGI << "ARG given for setting ZED RESOLUTION to HD720";
                 z_res = sl::RESOLUTION::HD720;
             }
             else if (res == "VGA") {
+                PLOGI << "ARG given for setting ZED RESOLUTION to VGA";
                 z_res = sl::RESOLUTION::VGA;
             }
         }
         else if (arg == "-zfps" || arg == "--zed_fps") {
             z_fps = std::stoi(std::string(argv[++i]));
+            PLOGI << "ARG given for setting ZED fps to " << z_fps;
         }
         else if (arg == "-zp" || arg == "--zed_play") {
+            PLOGI << "ARG given for Zed Recording is FALSE.";
             live_zed = false;
             z_in = argv[++i];
         }
         else if (arg == "-m" || arg == "--yolo_model") {
             model = argv[++i];
+            PLOGI << "ARG given for AI model is \"" << model << "\"";
         }
         else if (arg == "-mr" || arg == "--model_record") {
+            PLOGI << "ARG given for AI model recording is TRUE.";
             m_record = true;
             m_out = argv[++i];
         }
         else if (arg == "-mfps" || arg == "--model_fps") {
             m_fps = std::stoi(std::string(argv[++i]));
+            PLOGI << "ARG given for AI model fps is " << m_fps;
         }
         else if (arg == "-c" || arg == "--confidence") {
             confidence_percent = std::stoi(std::string(argv[++i]));
+            PLOGI << "ARG given for AI confidence percentage is " << confidence_percent << "%";
         }
         else if (arg == "-ip") {
             ip = argv[++i];
+            PLOGI << "ARG given for IP is [" << ip << "]";
         }
         else if (arg == "-p" || arg == "--port") {
             port = std::stoi(std::string(argv[++i]));
+            PLOGI << "ARG given for PORT is [" << port << "]";
         }
     }
 
     // Initialize ZED Cam
+    PLOGI << "Initializing ZED Cam on MAIN.";
     std::shared_ptr<ZED_Camera> cam_ptr;
     if (live_zed) {
         cam_ptr.reset(new ZED_Camera(z_record, z_res, z_fps, z_out));
@@ -154,11 +175,13 @@ int main(int argc, const char* argv[]) {
     Video_Frame frame;
 
     // Initialize AI
+    PLOGI << "Initializing AI on MAIN.";
     AI ai(model, m_record, m_out, m_fps);
     DetectedObjects objs;
     float conf = float(confidence_percent) / 100;
 
     // Initialize API
+    PLOGI << "Initializing API on MAIN.";
     API api(obj_mutex, objs);
 
     // Use argument variables

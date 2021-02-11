@@ -8,4 +8,5 @@ target_link_libraries(${PROJECT_NAME}
     mod::zed
     mod::ai
     mod::http-api
+    mod::logger
 )
