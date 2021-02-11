@@ -377,9 +377,11 @@ int main(int argc, const char* argv[]) {
     std::thread ai_thread(ai_stream, std::ref(ai), conf, std::ref(objs), std::ref(frame), std::ref(running));
     std::thread socket_api_thread(socket_api_stream, std::ref(objs), std::ref(running), std::ref(debugLevel));
 
-    //api.start(ip, port);
-    
-    running = false;
+
+    //TO DO: Make socket api be the one that stops the executable
+    // api.start(ip, port);
+    // running = false;
+
     camera_thread.join();
     ai_thread.join();
     socket_api_thread.join();
