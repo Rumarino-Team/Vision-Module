@@ -1,0 +1,22 @@
+syntax = "proto3"; 
+
+message Frame { 
+	 message Rect {
+		int32 height = 1; 
+		int32 width = 2 ; 
+		int32 x = 3; 
+		int32 y = 4; 
+	}
+
+	message location {
+	 	float x = 1;
+	 	float y = 2;
+	 	float z = 3;
+	}
+
+	location location_inf = 1;
+	Rect rect_inf = 2;
+	int32 id = 3;
+	string name= 4;
+	float distance = 5;
+} 
