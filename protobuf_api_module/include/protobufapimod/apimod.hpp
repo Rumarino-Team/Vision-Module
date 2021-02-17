@@ -8,10 +8,12 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "model.pb.h"
 #include <google/protobuf/message.h>
 #include <google/protobuf/util/delimited_message_util.h>
 
+#include "zedmod/zedmod.hpp"
+#include "aimod/aimod.hpp"
+#include "model.pb.h"
 
 class proto {
 public:

@@ -1,10 +1,15 @@
 # Set the project name
-project (api_module)
+project (protobuf_api_module)
 
 # Add a library with the above sources
 add_library(${PROJECT_NAME} src/apimod.cpp)
-add_library(mod::api ALIAS ${PROJECT_NAME})
+add_library(mod::protobufapi ALIAS ${PROJECT_NAME})
 
 target_include_directories( ${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
+
+# Required libs for linking
+target_link_libraries(${PROJECT_NAME}
+        mod::zed
+        mod::ai)
