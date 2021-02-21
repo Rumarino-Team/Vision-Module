@@ -6,7 +6,7 @@ DetectedObjects dummies;
 DetectedObject obj1;
 DetectedObject obj2;
 std::string output;
-proto proto_tester = proto(output);
+//proto proto_tester = proto(output);
 
 TEST(PROTO_API, getting_objects) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;

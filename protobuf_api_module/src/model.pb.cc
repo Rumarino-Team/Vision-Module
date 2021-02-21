@@ -14,53 +14,61 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
+extern PROTOBUF_INTERNAL_EXPORT_model_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Frame_Rect_model_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_model_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Frame_location_model_2eproto;
+class Frame_RectDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Frame_Rect> _instance;
+} _Frame_Rect_default_instance_;
+class Frame_locationDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Frame_location> _instance;
+} _Frame_location_default_instance_;
+class FrameDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Frame> _instance;
+} _Frame_default_instance_;
+static void InitDefaultsscc_info_Frame_model_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-PROTOBUF_PRAGMA_INIT_SEG
-constexpr Frame_Rect::Frame_Rect(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : height_(0)
-  , width_(0)
-  , x_(0)
-  , y_(0){}
-struct Frame_RectDefaultTypeInternal {
-  constexpr Frame_RectDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~Frame_RectDefaultTypeInternal() {}
-  union {
-    Frame_Rect _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT Frame_RectDefaultTypeInternal _Frame_Rect_default_instance_;
-constexpr Frame_location::Frame_location(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : x_(0)
-  , y_(0)
-  , z_(0){}
-struct Frame_locationDefaultTypeInternal {
-  constexpr Frame_locationDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~Frame_locationDefaultTypeInternal() {}
-  union {
-    Frame_location _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT Frame_locationDefaultTypeInternal _Frame_location_default_instance_;
-constexpr Frame::Frame(
-  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , location_inf_(nullptr)
-  , rect_inf_(nullptr)
-  , id_(0)
-  , distance_(0){}
-struct FrameDefaultTypeInternal {
-  constexpr FrameDefaultTypeInternal()
-    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~FrameDefaultTypeInternal() {}
-  union {
-    Frame _instance;
-  };
-};
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT FrameDefaultTypeInternal _Frame_default_instance_;
+  {
+    void* ptr = &::_Frame_default_instance_;
+    new (ptr) ::Frame();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_Frame_model_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_Frame_model_2eproto}, {
+      &scc_info_Frame_location_model_2eproto.base,
+      &scc_info_Frame_Rect_model_2eproto.base,}};
+
+static void InitDefaultsscc_info_Frame_Rect_model_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::_Frame_Rect_default_instance_;
+    new (ptr) ::Frame_Rect();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Frame_Rect_model_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Frame_Rect_model_2eproto}, {}};
+
+static void InitDefaultsscc_info_Frame_location_model_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::_Frame_location_default_instance_;
+    new (ptr) ::Frame_location();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Frame_location_model_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Frame_location_model_2eproto}, {}};
+
 static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_model_2eproto[3];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_model_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_model_2eproto = nullptr;
@@ -115,21 +123,23 @@ const char descriptor_table_protodef_model_2eproto[] PROTOBUF_SECTION_VARIABLE(p
   "\n\010location\022\t\n\001x\030\001 \001(\002\022\t\n\001y\030\002 \001(\002\022\t\n\001z\030\003 "
   "\001(\002b\006proto3"
   ;
+static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_model_2eproto_deps[1] = {
+};
+static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_model_2eproto_sccs[3] = {
+  &scc_info_Frame_model_2eproto.base,
+  &scc_info_Frame_Rect_model_2eproto.base,
+  &scc_info_Frame_location_model_2eproto.base,
+};
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_model_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_model_2eproto = {
-  false, false, 251, descriptor_table_protodef_model_2eproto, "model.proto", 
-  &descriptor_table_model_2eproto_once, nullptr, 0, 3,
+  false, false, descriptor_table_protodef_model_2eproto, "model.proto", 251,
+  &descriptor_table_model_2eproto_once, descriptor_table_model_2eproto_sccs, descriptor_table_model_2eproto_deps, 3, 0,
   schemas, file_default_instances, TableStruct_model_2eproto::offsets,
-  file_level_metadata_model_2eproto, file_level_enum_descriptors_model_2eproto, file_level_service_descriptors_model_2eproto,
+  file_level_metadata_model_2eproto, 3, file_level_enum_descriptors_model_2eproto, file_level_service_descriptors_model_2eproto,
 };
-PROTOBUF_ATTRIBUTE_WEAK ::PROTOBUF_NAMESPACE_ID::Metadata
-descriptor_table_model_2eproto_metadata_getter(int index) {
-  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_model_2eproto);
-  return descriptor_table_model_2eproto.file_level_metadata[index];
-}
 
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_model_2eproto(&descriptor_table_model_2eproto);
+static bool dynamic_init_dummy_model_2eproto = (static_cast<void>(::PROTOBUF_NAMESPACE_ID::internal::AddDescriptors(&descriptor_table_model_2eproto)), true);
 
 // ===================================================================
 
@@ -153,10 +163,10 @@ Frame_Rect::Frame_Rect(const Frame_Rect& from)
 }
 
 void Frame_Rect::SharedCtor() {
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&height_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&y_) -
-    reinterpret_cast<char*>(&height_)) + sizeof(y_));
+  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+      reinterpret_cast<char*>(&height_) - reinterpret_cast<char*>(this)),
+      0, static_cast<size_t>(reinterpret_cast<char*>(&y_) -
+      reinterpret_cast<char*>(&height_)) + sizeof(y_));
 }
 
 Frame_Rect::~Frame_Rect() {
@@ -178,6 +188,11 @@ void Frame_Rect::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void Frame_Rect::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
+const Frame_Rect& Frame_Rect::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Frame_Rect_model_2eproto.base);
+  return *internal_default_instance();
+}
+
 
 void Frame_Rect::Clear() {
 // @@protoc_insertion_point(message_clear_start:Frame.Rect)
@@ -423,10 +438,10 @@ Frame_location::Frame_location(const Frame_location& from)
 }
 
 void Frame_location::SharedCtor() {
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&x_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&z_) -
-    reinterpret_cast<char*>(&x_)) + sizeof(z_));
+  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+      reinterpret_cast<char*>(&x_) - reinterpret_cast<char*>(this)),
+      0, static_cast<size_t>(reinterpret_cast<char*>(&z_) -
+      reinterpret_cast<char*>(&x_)) + sizeof(z_));
 }
 
 Frame_location::~Frame_location() {
@@ -448,6 +463,11 @@ void Frame_location::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void Frame_location::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
+const Frame_location& Frame_location::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Frame_location_model_2eproto.base);
+  return *internal_default_instance();
+}
+
 
 void Frame_location::Clear() {
 // @@protoc_insertion_point(message_clear_start:Frame.location)
@@ -689,11 +709,12 @@ Frame::Frame(const Frame& from)
 }
 
 void Frame::SharedCtor() {
-name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&location_inf_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&distance_) -
-    reinterpret_cast<char*>(&location_inf_)) + sizeof(distance_));
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_Frame_model_2eproto.base);
+  name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+      reinterpret_cast<char*>(&location_inf_) - reinterpret_cast<char*>(this)),
+      0, static_cast<size_t>(reinterpret_cast<char*>(&distance_) -
+      reinterpret_cast<char*>(&location_inf_)) + sizeof(distance_));
 }
 
 Frame::~Frame() {
@@ -718,6 +739,11 @@ void Frame::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 void Frame::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
+const Frame& Frame::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Frame_model_2eproto.base);
+  return *internal_default_instance();
+}
+
 
 void Frame::Clear() {
 // @@protoc_insertion_point(message_clear_start:Frame)

@@ -26,10 +26,10 @@ include_directories(${OpenCV_INLCUDE_DIRS})
 find_library(DARKNET_LIBRARY NAMES dark libdark.so libdarknet.so)
 
 #PROTOBUF TODO
-#include(FindProtobuf)
-#find_package(Protobuf REQUIRED)
-#include_directories(${Protobuf_INCLUDE_DIRS})
-#link_directories(${PROTOBUF_LIBRARIES})
+include(FindProtobuf)
+find_package(Protobuf REQUIRED)
+include_directories(${Protobuf_INCLUDE_DIRS})
+link_directories(${PROTOBUF_LIBRARIES})
 
 
 # System libs
