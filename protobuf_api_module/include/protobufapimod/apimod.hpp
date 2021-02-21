@@ -9,7 +9,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <google/protobuf/message.h>
-#include <google/protobuf/util/delimited_message_util.h>
 
 #include "zedmod/zedmod.hpp"
 #include "aimod/aimod.hpp"
@@ -17,11 +16,10 @@
 
 class proto {
 public:
-    proto(const char * output);
+    proto(std::string output);
     ~proto();
-    void send(DetectedObjects &objects,const char* pipe);
-    void send_object(DetectedObject obj, const char* pipe);
-    void set_frame(Frame *frame, DetectedObject * obj);
+    void send(DetectedObjects objects,const char* pipe);
+    void set_frame(Frame frame, DetectedObject obj);
 private:
     std::string output;
 };

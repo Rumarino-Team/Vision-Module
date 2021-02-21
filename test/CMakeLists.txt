@@ -1,3 +1,5 @@
+cmake_minimum_required (VERSION 3.5)
+
 # Enable ExternalProject CMake module
 include(ExternalProject)
 

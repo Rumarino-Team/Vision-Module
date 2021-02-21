@@ -10,6 +10,9 @@ target_include_directories( ${PROJECT_NAME}
 )
 
 # Required libs for linking
+#TODO MAYBE DELETE PROTOBUF LIBRARY
 target_link_libraries(${PROJECT_NAME}
+#        ${Protobuf_LIBRARIES}
         mod::zed
         mod::ai)
+
