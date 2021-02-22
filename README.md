@@ -157,3 +157,19 @@ if you please.
 For a general explanation of how the library works refer to the example implementation inside the library itself.
 
 The kwargs are the same as the verbose versions of the executable args without the "--" prefix.
+Constructor is called like so
+```python
+args = {
+        "model_fps": "15",
+        "confidence": "60",
+        "ip": "0.0.0.0",
+        "port": "8080"
+    }
+
+server = VisionStream("yolo/model/path", **args)
+
+server.start()
+server.wait()
+```
+
+If a server is already running with that IP and Port then it will auto-connect instead or running a new instance.
