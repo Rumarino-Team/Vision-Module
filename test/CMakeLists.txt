@@ -48,7 +48,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${SRCS} ${HEADERS})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
         libgtest
         mod::zed
-        mod::ai
+        mod::yolo-ai
         mod::http-api
         )
 

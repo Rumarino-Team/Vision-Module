@@ -4,7 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <mutex>
 #include <atomic>
-#include "aimod/aimod.hpp"
+#include "yolomod/yolomod.hpp"
 
 class API {
 public:

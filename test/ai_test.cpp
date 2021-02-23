@@ -6,7 +6,7 @@
 #include <condition_variable>
 #include <gtest/gtest.h>
 #include "zedmod/zedmod.hpp"
-#include "aimod/aimod.hpp"
+#include "yolomod/yolomod.hpp"
 //#include "tools.hpp"
 
 bool file_exists_ai(const char* file) {

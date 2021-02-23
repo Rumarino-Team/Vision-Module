@@ -5,7 +5,7 @@
 #include <condition_variable>
 
 #include "zedmod/zedmod.hpp"
-#include "aimod/aimod.hpp"
+#include "yolomod/yolomod.hpp"
 #include "httpapimod/apimod.hpp"
 
 // Thread variables
