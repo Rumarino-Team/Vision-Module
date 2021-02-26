@@ -1,4 +1,4 @@
-#include "aimod/aimod.hpp"
+#include "yolomod/yolomod.hpp"
 
 AI::AI(std::string input_path, bool record, std::string output_path, int fps) {
     //Set recording flag
