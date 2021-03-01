@@ -5,8 +5,11 @@
 #include <condition_variable>
 
 #include "zedmod/zedmod.hpp"
-#include "yolomod/yolomod.hpp"
+#include "darknetmod/darknetmod.hpp"
+#include "visualobjmod/visualobjmod.hpp"
 #include "httpapimod/apimod.hpp"
+
+using json = nlohmann::json;
 
 // Thread variables
 std::mutex frame_mutex, obj_mutex;
@@ -28,7 +31,7 @@ void camera_stream(ZED_Camera &cam, Video_Frame &frame, std::atomic<bool> &runni
     cam.close();
 }
 
-void ai_stream(AI &ai, float confidence, DetectedObjects &objs, Video_Frame &frame, std::atomic<bool> &running) {
+void pipeline_stream(PipelineManager &pipelineManager, DetectedObjects &objs, Video_Frame &frame, std::atomic<bool> &running) {
     // Stop the thread properly
     while (running) {
         // Handle new frame
@@ -38,130 +41,132 @@ void ai_stream(AI &ai, float confidence, DetectedObjects &objs, Video_Frame &fra
         Video_Frame frame_copy(frame);
         frame_lock.unlock();
 
-        // Handle new object
+        // Make a new object before locking
+        DetectedObjects objects = pipelineManager.detect(frame_copy);
+
+        // Copy created object
         std::unique_lock<std::mutex> obj_lock(obj_mutex);
-        objs = ai.detect(frame_copy, confidence);
+        objs = objects;
         new_obj.notify_one();
         obj_lock.unlock();
     }
-    ai.close();
+    pipelineManager.close();
 }
-
 void print_help() {
-    std::cout << "---First define ZED parameters---" << std::endl;
-    std::cout << "[OPTIONAL] -zr   --zed_record" << std::endl;
-    std::cout << "\tUsage -zr /path/video_out.avi" << std::endl;
-    std::cout << "[OPTIONAL] -res  --resolution" << std::endl;
-    std::cout << "\t-res 1080" << std::endl;
-    std::cout << "[OPTIONAL] -zfps --zed_fps" << std::endl;
-    std::cout << "\t-zfps 60" << std::endl;
-    std::cout << "----------------or---------------\n" << std::endl;
-    std::cout << "[OPTIONAL] -zp   --zed_play" << std::endl;
-    std::cout << "\t-zp /path/video_in.avi" << std::endl;
-    std::cout << "--Now define darknet parameters--" << std::endl;
-    std::cout << "[REQUIRED] -m    --yolo_model" << std::endl;
-    std::cout << "\t-m /path/model" << std::endl;
-    std::cout << "[OPTIONAL] -mr   --model_record" << std::endl;
-    std::cout << "\t-mr /path/video_out.avi" << std::endl;
-    std::cout << "[OPTIONAL] -mfps --model_fps" << std::endl;
-    std::cout << "\t-mfps 60" << std::endl;
-    std::cout << "[OPTIONAL] -c    --confidence" << std::endl;
-    std::cout << "\t-c 60" << std::endl;
-    std::cout << "\n--Finally define server params--" << std::endl;
-    std::cout << "[OPTIONAL] -ip" << std::endl;
-    std::cout << "\t-ip 0.0.0.0" << std::endl;
-    std::cout << "[OPTIONAL] -p    --port" << std::endl;
-    std::cout << "\t-p 8080" << std::endl;
+    std::cout << "A background artificial intelligence with a custom image processing pipeline.\n\n"
+                 "-cfg config, --config config\tA json file that configs the server.\n"<< std::endl;
 }
 
 int main(int argc, const char* argv[]) {
     // Zed arguments
-    bool live_zed = true;
-    bool z_record = false;
-    sl::RESOLUTION z_res = sl::RESOLUTION::HD1080;
-    int z_fps = 30;
-    std::string z_out, z_in;
-    // AI arguments
-    std::string model, m_out;
-    bool m_record = false;
-    int m_fps = 15;
-    int confidence_percent = 60;
+    std::shared_ptr<ZED_Camera> cam_ptr;
+
+    // Pipeline Arguments
+    Pipeline pipeline;
+    bool p_record = false;
+    int p_fps = 15;
+    std::string p_out;
+
     // API Arguments
     const char* ip = "0.0.0.0";
     int port = 8080;
 
     for (int i = 1; i < argc; i++) {
         std::string arg = std::string(argv[i]);
+        // Help
         if (arg == "-h" || arg == "--help") {
             print_help();
             return 0;
         }
-        else if (arg == "-zr" || arg == "--zed_record") {
-            live_zed = true;
-            z_out = argv[++i];}
-        else if (arg == "-res" || arg == "--resolution") {
-            std::string res = argv[++i];
-            if (res == "1080") {
-                z_res = sl::RESOLUTION::HD1080;
-            }
-            else if (res == "2k") {
-                z_res = sl::RESOLUTION::HD2K;
-            }
-            else if (res == "720") {
-                z_res = sl::RESOLUTION::HD720;
-            }
-            else if (res == "VGA") {
-                z_res = sl::RESOLUTION::VGA;
-            }
-        }
-        else if (arg == "-zfps" || arg == "--zed_fps") {
-            z_fps = std::stoi(std::string(argv[++i]));
-        }
-        else if (arg == "-zp" || arg == "--zed_play") {
-            live_zed = false;
-            z_in = argv[++i];
-        }
-        else if (arg == "-m" || arg == "--yolo_model") {
-            model = argv[++i];
-        }
-        else if (arg == "-mr" || arg == "--model_record") {
-            m_record = true;
-            m_out = argv[++i];
-        }
-        else if (arg == "-mfps" || arg == "--model_fps") {
-            m_fps = std::stoi(std::string(argv[++i]));
-        }
-        else if (arg == "-c" || arg == "--confidence") {
-            confidence_percent = std::stoi(std::string(argv[++i]));
-        }
-        else if (arg == "-ip" || arg == "--ip") {
-            ip = argv[++i];
-        }
-        else if (arg == "-p" || arg == "--port") {
-            port = std::stoi(std::string(argv[++i]));
-        }
-    }
 
-    if(model.empty()) {
-        std::cout << "No YOLO model specified!" << std::endl;
-        return 0;
+        // Config
+        if (arg == "-cfg" || arg == "--config") {
+            std::ifstream cfg_file;
+            cfg_file.open(argv[++i]);
+            if(!cfg_file) {
+                // If CFG file was not found by filestream
+                std::cout << "CFG Not found" << std::endl;
+                return 0;
+            } else {
+                std::string cfg_json, line;
+                while(!cfg_file.eof()) {
+                    getline(cfg_file, line);
+                    cfg_json += line;
+                }
+                // Parse json file to be able to use it comfortably
+                json config = json::parse(cfg_json);
+                for (json module : config["config"]) {
+                    if (module["module"] == "ZED") {
+                        if (module["prerecorded"]) {
+                            // Prerecorded videos dont require any other type of info
+                            std::string z_in = module["inpath"];
+                            cam_ptr.reset(new ZED_Camera(z_in));
+                        } else {
+                            // Live video requires way more information to record
+                            sl::RESOLUTION z_res = sl::RESOLUTION::HD1080;
+                            int z_fps = module["fps"];
+                            bool z_record = module["record"];
+                            std::string z_out = module["outpath"];
+
+                            if (module["resolution"] == "1080") {
+                                z_res = sl::RESOLUTION::HD1080;
+                            }
+                            else if (module["resolution"] == "2k") {
+                                z_res = sl::RESOLUTION::HD2K;
+                            }
+                            else if (module["resolution"] == "720") {
+                                z_res = sl::RESOLUTION::HD720;
+                            }
+                            else if (module["resolution"] == "VGA") {
+                                z_res = sl::RESOLUTION::VGA;
+                            }
+
+                            cam_ptr.reset(new ZED_Camera(z_record, z_res, z_fps, z_out));
+                        }
+
+
+                    }
+
+                    else if (module["module"] == "HTTP") {
+                        // We explicitly say that its a string to be able to convert to const char*
+                        ip = std::string(module["ip"]).c_str();
+                        port = module["port"];
+                    }
+
+                    else if (module["module"] == "pipeline") {
+                        p_record = module["record"];
+                        p_out = module["outpath"];
+                        p_fps = module["fps"];
+                        for (json pipelineModule : module["pipeline"]) {
+                            // We must allocate pipeline items on the heap to prevent losing the data
+                            if (pipelineModule["module"] == "darknet") {
+                                std::string model = pipelineModule["model"];
+                                float confidence = float(pipelineModule["confidence"]) / 100;
+                                pipeline.push_back(new DarknetModule(model, confidence));
+                            }
+                            else if (pipelineModule["module"] == "visual obj") {
+                                int red = pipelineModule["color"][0];
+                                int blue = pipelineModule["color"][1];
+                                int green = pipelineModule["color"][2];
+                                cv::Scalar_<double>  color = cv::Scalar(blue, green, red);
+                                int thickness = pipelineModule["thickness"];
+                                pipeline.push_back(new VisualObjModule(color, thickness));
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
     }
 
     // Initialize ZED Cam
-    std::shared_ptr<ZED_Camera> cam_ptr;
-    if (live_zed) {
-        cam_ptr.reset(new ZED_Camera(z_record, z_res, z_fps, z_out));
-    } else {
-        cam_ptr.reset(new ZED_Camera(z_in));
-    }
-
     ZED_Camera& cam = *cam_ptr;
     Video_Frame frame;
 
     // Initialize AI
-    AI ai(model, m_record, m_out, m_fps);
+    PipelineManager pipelineManager(pipeline, p_record, p_out, p_fps);
     DetectedObjects objs;
-    float conf = float(confidence_percent) / 100;
 
     // Initialize API
     API api(obj_mutex, objs);
@@ -171,10 +176,10 @@ int main(int argc, const char* argv[]) {
 
     // Since threads copy arguments we must pass them by reference.
     std::thread camera_thread(camera_stream, std::ref(cam), std::ref(frame), std::ref(running));
-    std::thread ai_thread(ai_stream, std::ref(ai), conf, std::ref(objs), std::ref(frame), std::ref(running));
+    std::thread pipeline_thread(pipeline_stream, std::ref(pipelineManager), std::ref(objs), std::ref(frame), std::ref(running));
 
     api.start(ip, port);
     running = false;
     camera_thread.join();
-    ai_thread.join();
+    pipeline_thread.join();
 }

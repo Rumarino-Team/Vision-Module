@@ -1,0 +1,37 @@
+{
+  "config": [
+    {
+      "module": "ZED",
+      "prerecorded": true,
+      "inpath": "/home/file.svo",
+
+      "resolution": "1080",
+      "fps": 30,
+      "record": true,
+      "outpath": "/path/file.svo"
+    },
+    {
+      "module": "HTTP",
+      "ip": "0.0.0.0",
+      "port": 8080
+    },
+    {
+      "module": "pipeline",
+      "record": true,
+      "outpath": "/path/file.avi",
+      "fps": 15,
+      "pipeline": [
+        {
+          "module": "darknet",
+          "model": "/path/model",
+          "confidence": 60
+        },
+        {
+          "module": "visual obj",
+          "color": [0, 255, 0],
+          "thickness": 4
+        }
+      ]
+    }
+  ]
+}

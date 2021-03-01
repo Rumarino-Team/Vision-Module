@@ -39,7 +39,7 @@ add_definitions(-std=c++17 -g -O3)
 
 # Add sub directories
 add_subdirectory(camera)
-add_subdirectory(image-processing/yolo-ai)
+add_subdirectory(image-processing)
 add_subdirectory(api)
 add_subdirectory(executable_module)
 

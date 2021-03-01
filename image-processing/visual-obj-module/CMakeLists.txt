@@ -1,9 +1,9 @@
 # Set the project name
-project (http-api_module)
+project (visual_obj_module)
 
 # Add a library with the above sources
-add_library(${PROJECT_NAME} src/apimod.cpp)
-add_library(mod::http-api ALIAS ${PROJECT_NAME})
+add_library(${PROJECT_NAME} src/visualobjmod.cpp)
+add_library(mod::visual-obj-mod ALIAS ${PROJECT_NAME})
 
 target_include_directories( ${PROJECT_NAME}
     PUBLIC ${PROJECT_SOURCE_DIR}/include
@@ -11,6 +11,7 @@ target_include_directories( ${PROJECT_NAME}
 
 # Required libs for linking
 target_link_libraries(${PROJECT_NAME}
+        mod::zed
         mod::pipeline-ai
-        httplib::httplib
-        nlohmann_json::nlohmann_json)
+        ${SPECIAL_OS_LIBS}
+        ${OpenCV_LIBS})

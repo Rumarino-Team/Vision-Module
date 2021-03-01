@@ -6,19 +6,15 @@
 #include <condition_variable>
 #include <gtest/gtest.h>
 #include "zedmod/zedmod.hpp"
-#include "yolomod/yolomod.hpp"
-//#include "tools.hpp"
-
-bool file_exists_ai(const char* file) {
-    struct stat buffer;
-    return (stat (file, &buffer) == 0);
-}
+#include "darknetmod/darknetmod.hpp"
+#include "visualobjmod/visualobjmod.hpp"
+#include "tools.hpp"
 
 std::string in_video = "media/test_input_video.svo";
 
 std::string input_path = "media/RUBBER-DUCKY";
 
-TEST(AI, File_Checker) {
+TEST(Darknet, File_Checker) {
     std::vector <std::string> tokens;
     std::stringstream charToString(input_path);
     std::string intermediate;
@@ -31,29 +27,32 @@ TEST(AI, File_Checker) {
     std::string weights = input_path + "/weights/" + dir_name + "_best.weights";
     std::string names = input_path + "/custom.names";
 
-    EXPECT_TRUE(file_exists_ai(cfg.c_str()));
-    EXPECT_TRUE(file_exists_ai(weights.c_str()));
-    EXPECT_TRUE(file_exists_ai(names.c_str()));
+    EXPECT_TRUE(file_exists(cfg.c_str()));
+    EXPECT_TRUE(file_exists(weights.c_str()));
+    EXPECT_TRUE(file_exists(names.c_str()));
 }
 
-TEST(AI, Video_Detection) {
-    // For just testing the video
-    AI ai(input_path);
-    // For testing and creating an output video
-    //AI ai(input_path, true, "media/test_detection_video.mp4", 30)
+TEST(Pipeline, Darknet_Video_Detection) {
+    // Create the darknet pipeline module
+    DarknetModule darkMod(input_path, 0.60);
+
+    // Create the pipeline manager
+    Pipeline pipeline = {&darkMod};
+    PipelineManager ai(pipeline, false);
 
     cv::VideoCapture cap("media/test_video.mp4");
     EXPECT_TRUE(cap.isOpened());
 
     while(true) {
+        Video_Frame frame;
         cv::Mat img;
         if (cap.read(img)) {
-            auto obj = ai.detect(img, 0.6);
+            frame.image = img;
+            auto obj = ai.detect(frame);
         } else {
             break;
         }
     }
-
 }
 
 // Declare thread functions
@@ -82,21 +81,31 @@ void camera_stream(ZED_Camera *cam, std::atomic<bool> &running) {
     }
 }
 
-TEST(AI, Multi_Threading) {
+TEST(Pipeline, Multi_Threading) {
     ZED_Camera cam(in_video);
-    AI ai(input_path, true, "media/ai_output.avi");
-    float minimum_confidence = 0.60;
+    std::string out_video = "media/ai_output.avi";
+
+    Pipeline pipeline;
+
+    // Create the darknet pipeline module
+    float confidence = 0.60;
+    pipeline.push_back(new DarknetModule(input_path, confidence));
+
+    // Create the image writing pipeline module
+    pipeline.push_back(new VisualObjModule());
+
+    PipelineManager ai(pipeline, true, out_video);
 
     static std::atomic<bool> running = true;
     std::thread camera_thread(camera_stream, &cam, std::ref(running));
 
-    for (int i=0; i < 30; i++) {
+    for (int i=0; i < 500; i++) {
 
         auto start = std::chrono::high_resolution_clock::now();
 
         std::unique_lock<std::mutex> frame_lock(frame_mutex);
         new_frame.wait(frame_lock);
-        DetectedObjects threaded_obj = ai.detect(threaded_frame, minimum_confidence);
+        DetectedObjects threaded_obj = ai.detect(threaded_frame);
         frame_lock.unlock();
 
         auto stop = std::chrono::high_resolution_clock::now();
@@ -111,7 +120,6 @@ TEST(AI, Multi_Threading) {
             std::cout << "\tObject Name: " << obj.name << std::endl;
             std::cout << "\tDistance: " << obj.distance << std::endl;
             std::cout << "\tLocation: (" << obj.location.x << ", " << obj.location.y << ", " << obj.location.z << " )\n" << std::endl;
-            //TODO: avoid getting nan in distance, empty string names and other irregularities like those
             //EXPECT_TRUE();
         }
         std::cout << "}" << std::endl;
@@ -123,4 +131,3 @@ TEST(AI, Multi_Threading) {
     ai.close();
     cam.close();
 }
-

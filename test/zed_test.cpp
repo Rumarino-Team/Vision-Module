@@ -3,12 +3,7 @@
 #include <chrono>
 #include <gtest/gtest.h>
 #include "zedmod/zedmod.hpp"
-//#include "tools.hpp"
-
-bool file_exists(const char* file) {
-    struct stat buffer;
-    return (stat (file, &buffer) == 0);
-}
+#include "tools.hpp"
 
 std::string playback_video("media/test_input_video.svo");
 
