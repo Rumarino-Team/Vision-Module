@@ -74,6 +74,7 @@ directory where the program will be compiled in:
 mkdir build-release
 cd build-release
 cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j5
 ```
 
 Testers are automatically compiled when using Debug build type
@@ -81,6 +82,7 @@ Testers are automatically compiled when using Debug build type
 mkdir build-debug
 cd build-debug
 cmake -DCMAKE_BUILD_TYPE=Debug ..
+make -j5
 ```
 
 Copy the executable over to your local folder for ease of use
@@ -90,86 +92,30 @@ sudo cp /executable_module/vision_http_server /usr/local/bin/
 
 ## Running the executable
 
-The executable supports various arguments that modify its behavior.
-
 ```bash
 # To display a help page
 vision_http_server [-h, --help]
+# To run with configs
+vision_http_server -cfg [path_to_file]
 ```
 
-### Argument descriptions
+### Executable configuration
 
-If you already tried to look at the help page you'll notice that the executable has plenty 
-of different arguments, in the following sections these will be explained with more clarity.
+ To see an example configuration check out /executable_module/config-example.json
 
-#### ZED Camera parameters
-The following parameters are all optional, if no arguments are specified the ZED feed will 
-be live at 1080p resolution and 30 frames per second.
+### Using the Python library
 
-The following arguments are for the ZED live feed.
-```bash
-# Tell the ZED camera to start recording the live feed and save it in the specified file
-[-zr, --zed_record] ${video_ouput}
-
-# Specify the feed resolution
-[-res, --resolution] ${resolution}
-
-# Specify the feed frame rate
-[-zfps, --zed_fps] ${fps}
-```
-
-The following are for pre-recorded feeds
-```bash
-# Point to the pre-recorded svo file
-[-zp, --zed_play] ${SVO_file}
-```
-
-#### Darknet parameters
-The only parameter that is required is the yolo_model flag. The rest are optional.
-
-```bash
-# Required parameter that points to the pre-trained model folder
-[-m, --yolo_model] ${model_path}
-
-# Enable recording the model's output and output
-[-mr, --model_record] ${video_output}
-
-# Specify the recording's target framerate
-[-mfps, --model_fps] ${fps}
-
-# Target confidence percentage for the model's detection
-[-c, --confidence] ${confidence}
-```
-
-#### Server parameters
-The server by default is initialized at 0.0.0.0:8080, but you can change this
-if you please.
-
-```bash
-# The ip in which the server can be reached
--ip ${ip}
-
-# The port in which the server will be listening at
-[-p, --port] ${port}
-```
-
-#### Using the Python library
 For a general explanation of how the library works refer to the example implementation inside the library itself.
 
-The kwargs are the same as the verbose versions of the executable args without the "--" prefix.
-Constructor is called like so
-```python
-args = {
-        "model_fps": "15",
-        "confidence": "60",
-        "ip": "0.0.0.0",
-        "port": "8080"
-    }
+The constructor takes the configuration json path and the executable name.
 
-server = VisionStream("yolo/model/path", **args)
+```python
+server = VisionStream("json/path")
 
 server.start()
 server.wait()
+
+server.get_objects()
 ```
 
 If a server is already running with that IP and Port then it will auto-connect instead or running a new instance.
