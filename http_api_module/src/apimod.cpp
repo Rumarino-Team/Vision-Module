@@ -5,9 +5,8 @@ API::API(std::mutex &obj_mutex, DetectedObjects &ai_objects) : mtx(obj_mutex), o
 }
 
 void API::start(const char* ip, int port) {
-    PLOGI << "Initializing API with IP [" << ip << "] on PORT " << port;
     server.listen(ip, port);
-    PLOGI << "API initialized.";
+    PLOGI << "Initialized API with IP [" << ip << "] on PORT " << port;
 }
 
 void API::init() {
@@ -19,15 +18,15 @@ void API::init() {
     server.Get("/detected_objects", [this](const httplib::Request& req, httplib::Response& res) {
         //TODO: If variable hasn't updated then keep the old json
         PLOGI << "API call of type\t[GET]\tLocation\t/detected_objects";
-        PLOGI << "Copying array of objects to prevent stopping the AI thread.";
+        PLOGD << "Copying array of objects to prevent stopping the AI thread.";
         std::unique_lock<std::mutex> lock(mtx);
         //Copy the array to prevent stopping the AI thread
         DetectedObjects obj_cpy = objs;
         lock.unlock();
-        PLOGI << "Array copied.";
+        PLOGD << "Array copied.";
         json out;
         std::vector<json> objs_list;
-        PLOGI << "Creating JSON format for each object found in objs_list.";
+        PLOGD<< "Creating JSON format for each object found in objs_list.";
         for (const DetectedObject &obj : obj_cpy) {
             json obj_json {
                     {"bounding_box", {
@@ -48,7 +47,7 @@ void API::init() {
 
             objs_list.push_back(obj_json);
         }
-        PLOGI << "Sending through API call the JSON formatted objects.";
+        PLOGD << "Sending through API call the JSON formatted objects.";
         out["DetectedObjects"] = objs_list;
         res.set_content(out.dump(), "text/plain");
     });
