@@ -40,7 +40,7 @@ add_definitions(-std=c++17 -g -O3)
 # Add sub directories
 add_subdirectory(zed_module)
 add_subdirectory(ai_module)
-add_subdirectory(http_api_module)
+#add_subdirectory(http_api_module)
 add_subdirectory(socket_api_module)
 add_subdirectory(executable_module)
 

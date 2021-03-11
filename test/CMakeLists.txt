@@ -49,7 +49,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
         libgtest
         mod::zed
         mod::ai
-        mod::http-api
+        #mod::http-api
         )
 
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})

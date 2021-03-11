@@ -16,7 +16,7 @@
 
 #include "zedmod/zedmod.hpp"
 #include "aimod/aimod.hpp"
-#include "httpapimod/apimod.hpp"
+//#include "httpapimod/apimod.hpp"
 
 // Thread variables
 std::mutex frame_mutex, obj_mutex;
