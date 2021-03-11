@@ -8,7 +8,7 @@
  */
 cv::Mat zedMat2cvMat(sl::Mat input) {
     // Mapping between MAT_TYPE and CV_TYPE
-    PLOGI << "ZED: Converting ZED mat to CV mat.";
+    PLOGD << "ZED: Converting ZED mat to CV mat.";
     int cv_type = -1;
     switch (input.getDataType()) {
         case sl::MAT_TYPE::F32_C1: cv_type = CV_32FC1; break;
@@ -74,16 +74,14 @@ const char* ErrorToString(sl::ERROR_CODE error) {
 Video_Frame::Video_Frame() = default;
 
 Video_Frame::Video_Frame(cv::Mat &image, cv::Mat &depth_map, cv::Mat &point_cloud) {
-    PLOGI << "ZED: Saving given image.";
+    PLOGD << "ZED: Saving given image, depth map, and point cloud.";
     this->image = image;
-    PLOGI << "ZED: Saving given depth map.";
     this->depth_map = depth_map;
-    PLOGI << "ZED: Saving given point cloud.";
     this->point_cloud = point_cloud;
 }
 
 Video_Frame::Video_Frame(Video_Frame &frame) {
-    PLOGI << "ZED: Saving a copy of the frame.";
+    PLOGD << "ZED: Saving a copy of the frame.";
     this->copy(frame);
 }
 
@@ -97,7 +95,6 @@ ZED_Camera::ZED_Camera(bool record, const std::string &recording_out, Video_Qual
     sl::RESOLUTION res;
     int fps;
 
-    PLOGI << "ZED: Choosing camera quality.";
     switch (quality) {
         case Video_Quality::HD2K_15fps: res = sl::RESOLUTION::HD2K; fps=15; break;
         case Video_Quality::HD1080_15fps: res = sl::RESOLUTION::HD1080; fps=15; break;
@@ -111,7 +108,7 @@ ZED_Camera::ZED_Camera(bool record, const std::string &recording_out, Video_Qual
         case Video_Quality::VGA_100fps: res = sl::RESOLUTION::VGA; fps=100; break;
     }
 
-    PLOGI << "ZED: Initializing ZED camera.";
+    PLOGI << "Initializing ZED camera.";
     this->init(record, std::string(), recording_out, res, fps);
 }
 
@@ -127,24 +124,23 @@ void ZED_Camera::init(bool record, const std::string &playback_video, const std:
     zed = sl::Camera();
 
     // Conf params
-    PLOGI << "ZED: Initializing configuration parameters.";
+    PLOGD << "Initializing configuration parameters.";
     sl::InitParameters init_params;
     init_params.sdk_verbose = true; // Use for the debug flag.
     // Init depth sensing
-    PLOGI << "ZED: Initializing depth sensing feature.";
+    PLOGD << "Initializing depth sensing feature.";
     init_params.depth_mode = sl::DEPTH_MODE::ULTRA;
     init_params.coordinate_units = sl::UNIT::METER;
     init_params.depth_stabilization = true;
 
     // Choose either opening a camera stream or video stream
-    PLOGI << "ZED: Choosing either opening a camera stream or video stream.";
     if (playback_video.empty()) {
-        PLOGI << "ZED: Opening camera.";
+        PLOGD << "Opening camera.";
         init_params.camera_resolution = res;
         init_params.camera_fps = fps;
 
     } else {
-        PLOGI << "ZED: Opening video stream.";
+        PLOGD << "Opening video stream.";
         init_params.input.setFromSVOFile(playback_video.c_str());
         init_params.svo_real_time_mode = true; // This will allow the video to play realtime
     }
@@ -163,7 +159,7 @@ void ZED_Camera::init(bool record, const std::string &playback_video, const std:
     // If recording enabled activate it
     recording = record;
     if (recording) {
-        PLOGI << "ZED: Enabling recording on ZED camera.";
+        PLOGD << "Enabling recording on ZED camera.";
         sl::RecordingParameters record_params;
         record_params.video_filename = recording_out.c_str();
         record_params.target_framerate = fps;
@@ -180,34 +176,31 @@ Video_Frame ZED_Camera::update() {
     if (zed.grab() == sl::ERROR_CODE::SUCCESS) {
         // Since the following functions just copy over to the given variable
         // We must first initialize a sl::Mat to then convert over to  cv::Mat
-        PLOGI << "ZED: Successfully grabbed an image from ZED camera.";
-        PLOGI << "ZED: Retrieving image from ZED camera...";
+        PLOGD << "Successfully grabbed an image from ZED camera.\nRetrieving image from ZED camera...\nRetrieving depth map from ZED camera...\nRetrieving point cloud from ZED camera...";
         zed.retrieveImage(left_image, sl::VIEW::LEFT);
-        PLOGI << "ZED: Retrieving depth map from ZED camera...";
         zed.retrieveMeasure(depth_map, sl::MEASURE::DEPTH);
-        PLOGI << "ZED: Retrieving point cloud from ZED camera...";
         zed.retrieveMeasure(point_cloud, sl::MEASURE::XYZ);
         new_frame.image = zedMat2cvMat(left_image);
         new_frame.depth_map = zedMat2cvMat(depth_map);
         new_frame.point_cloud = zedMat2cvMat(point_cloud);
+        PLOGD << "Successfully grabbed image, depth map, and point cloud";
     }
     else if (zed.grab() == sl::ERROR_CODE::END_OF_SVOFILE_REACHED) {
-        std::cout << "SVO end has been reached. Looping back to first frame" << std::endl;
-        PLOGI << "ZED: SVO end has been reached. Looping back to first frame";
+        PLOGD << "SVO end has been reached. Looping back to first frame";
         zed.setSVOPosition(0);
         new_frame = this->update(); // Avoid returning an empty object
     }
 
-    PLOGI << "ZED: Returning new frame grabbed from ZED camera.";
+    PLOGD << "Returning new frame grabbed from ZED camera.";
     return new_frame;
 }
 
 void ZED_Camera::close() {
     if (recording) {
-        PLOGI << "ZED: Closing recording on ZED camera.";
+        PLOGI << "Closing recording on ZED camera.";
         zed.disableRecording();
     }
-    PLOGI << "ZED: Closing ZED camera itself.";
+    PLOGI << "Closing ZED camera itself.";
     zed.close();
     zed.~Camera();
 }
@@ -216,7 +209,7 @@ void svo2img(const std::string &playback_video, const std::string &image_save_pa
     sl::Camera zed;
 
     // Conf params
-    PLOGI << "ZED: Setting initializing configuration parameters for ZED on svo2img.";
+    PLOGD << "Setting initializing configuration parameters for ZED on svo2img.";
     sl::InitParameters init_params;
     init_params.sdk_verbose = true; // Use for the debug flag.
 
@@ -237,8 +230,7 @@ void svo2img(const std::string &playback_video, const std::string &image_save_pa
     while (true) {
         img_count++;
         if (zed.grab() == sl::ERROR_CODE::SUCCESS) {
-            PLOGI << "ZED: Successfully grabbed an image from ZED camera.";
-            PLOGI << "ZED: Retrieving image from ZED camera...";
+            PLOGD << "Successfully grabbed an image from ZED camera.\nRetrieving image from ZED camera...";
             // Get and convert the image file
             sl::Mat left_image;
             zed.retrieveImage(left_image, sl::VIEW::LEFT);
@@ -250,14 +242,14 @@ void svo2img(const std::string &playback_video, const std::string &image_save_pa
             compression_params.push_back( 100 );
 
             // Save the image file
-            PLOGI << "ZED: Saving image file.";
+            PLOGD << "Saving image file.";
             std::string img_path = image_save_path+"/image"+std::to_string(img_count)+".jpg";
             std::cout << "Saved frame " << img_count << " as " << img_path << std::endl;
             cv::imwrite(img_path, image, compression_params);
         }
         else if (zed.grab() == sl::ERROR_CODE::END_OF_SVOFILE_REACHED) {
             // When video ends, stop
-            PLOGI << "ZED: Video has ended. Stopping video.";
+            PLOGI << "Video has ended. Stopping video.";
             break;
         }
     }
