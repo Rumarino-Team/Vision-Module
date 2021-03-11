@@ -1,23 +1,23 @@
 import subprocess
 import requests
-
+import json
 
 class VisionStream:
-    def __init__(self, model, executable="vision_http_server", **arguments):
+    def __init__(self, config, executable="vision_http_server"):
         # Initialize the string used in the system call
-        self.start_command = f"{executable} --yolo_model {model}"
+        self.start_command = f"{executable} --config {config}"
 
         # Set default address values
         ip = "0.0.0.0"
         port = "8080"
 
-        # Build the string arguments
-        for key, value in arguments.items():
-            self.start_command += f" --{key} {value}"
-            if key == "ip":
-                ip = value
-            elif key == "port":
-                port = value
+        # Read json and find http server information
+        with open(config) as f:
+            data = json.load(f)
+            for module in data["config"]:
+                if module["module"] == "HTTP":
+                    ip = module["ip"]
+                    port = str(module["port"])
 
         self.address = f"http://{ip}:{port}"
         print(self.start_command)
@@ -75,16 +75,7 @@ if __name__ == '__main__':
 
     print("Creating the server")
 
-    args = {
-        "zed_play": "/home/tipo/Downloads/test_input_video.svo",
-        "model_record": "/home/tipo/Downloads/result.avi",
-        "model_fps": "15",
-        "confidence": "60",
-        "ip": "0.0.0.0",
-        "port": "8080"
-    }
-
-    test_server = VisionStream("/home/tipo/Downloads/RUBBER-DUCKY", **args)
+    test_server = VisionStream("/home/tipo/Documents/rumarino_config.json")
 
     test_server.start()
 
