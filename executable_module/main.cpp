@@ -71,11 +71,12 @@ void print_help() {
     std::cout << "\t-mfps 60" << std::endl;
     std::cout << "[OPTIONAL] -c    --confidence" << std::endl;
     std::cout << "\t-c 60" << std::endl;
-    std::cout << "\n--Finally define server params--" << std::endl;
+    std::cout << "\n--Now define server params--" << std::endl;
     std::cout << "[OPTIONAL] -ip" << std::endl;
     std::cout << "\t-ip 0.0.0.0" << std::endl;
     std::cout << "[OPTIONAL] -p    --port" << std::endl;
     std::cout << "\t-p 8080" << std::endl;
+    std::cout << "\n--Finally define logger params--" << std::endl;
     std::cout << "[OPTIONAL] -d    --debug" << std::endl;
 }
 
