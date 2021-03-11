@@ -17,7 +17,6 @@ std::condition_variable new_frame, new_obj;
 
 void camera_stream(ZED_Camera &cam, Video_Frame &frame, std::atomic<bool> &running){
     // Stop the thread properly
-    PLOGI << "Stopping CAMERA_STREAM thread properly...";
     while (running) {
         std::unique_lock<std::mutex> lock(frame_mutex);
         frame = cam.update();
@@ -32,7 +31,6 @@ void camera_stream(ZED_Camera &cam, Video_Frame &frame, std::atomic<bool> &runni
 
 void ai_stream(AI &ai, float confidence, DetectedObjects &objs, Video_Frame &frame, std::atomic<bool> &running) {
     // Stop the thread properly
-    PLOGI << "Stopping AI_STREAM thread properly...";
     while (running) {
         // Handle new frame
         std::unique_lock<std::mutex> frame_lock(frame_mutex);
@@ -98,9 +96,11 @@ int main(int argc, const char* argv[]) {
     // Logger arguments
     // INFO Logger by default
     std::string maxSeverity = "info";
+    std::string allArgs = " ";
 
     for (int i = 1; i < argc; i++) {
         std::string arg = std::string(argv[i]);
+        allArgs += arg + " ";
         if (arg == "-h" || arg == "--help") {
             print_help();
             return 0;
@@ -158,47 +158,46 @@ int main(int argc, const char* argv[]) {
     // Initialize Logger
     initPLOG(maxSeverity);
     // Check what params were given prior to initializing the PLOG
+    PLOGI << "CONFIG\t" + allArgs;
     PLOGD << "Debug mode has been turned on for LOGGING.";
-    if(maxSeverity == "debug"){ // Informational LOG for DEBUG
-        if(!z_out.empty()){
-            PLOGI << "ARG given for zed recording true and out at " << z_out;
-        }
-        if (z_res == sl::RESOLUTION::HD1080) {
-            PLOGI << "ARG given for setting ZED RESOLUTION to HD1080";
-        }
-        else if (z_res == sl::RESOLUTION::HD2K) {
-            PLOGI << "ARG given for setting ZED RESOLUTION to HD2k";
-        }
-        else if (z_res == sl::RESOLUTION::HD720) {
-            PLOGI << "ARG given for setting ZED RESOLUTION to HD720";
-        }
-        else if (z_res == sl::RESOLUTION::VGA) {
-            PLOGI << "ARG given for setting ZED RESOLUTION to VGA";
-        }
-        if(z_fps != 30){
-            PLOGI << "ZED fps set to " << z_fps;
-        }
-        if(!z_in.empty()){
-            PLOGI << "ARG given for zed playback at " << z_in;
-        }
-        if(!model.empty()){
-            PLOGI << "ARG given for AI model is \"" << model << "\"";
-        }
-        if(!m_out.empty()){
-            PLOGI << "ARG given for AI model recording is TRUE with out at " << m_out;
-        }
-        if(m_fps != 15){
-            PLOGI << "ARG given for AI model fps is " << m_fps;
-        }
-        if(confidence_percent != 60){
-            PLOGI << "ARG given for AI confidence percentage is " << confidence_percent << "%";
-        }
-        if(std::strcmp(ip, "0.0.0.0") != 0){
-            PLOGI << "ARG given for IP is [" << ip << "]";
-        }
-        if(port != 8080){
-            PLOGI << "ARG given for PORT is [" << port << "]";
-        }
+    if(!z_out.empty()){
+        PLOGD << "ARG given for zed recording true and out at " << z_out;
+    }
+    if (z_res == sl::RESOLUTION::HD1080) {
+        PLOGD << "ARG given for setting ZED RESOLUTION to HD1080";
+    }
+    else if (z_res == sl::RESOLUTION::HD2K) {
+        PLOGD << "ARG given for setting ZED RESOLUTION to HD2k";
+    }
+    else if (z_res == sl::RESOLUTION::HD720) {
+        PLOGD << "ARG given for setting ZED RESOLUTION to HD720";
+    }
+    else if (z_res == sl::RESOLUTION::VGA) {
+        PLOGD << "ARG given for setting ZED RESOLUTION to VGA";
+    }
+    if(z_fps != 30){
+        PLOGD << "ZED fps set to " << z_fps;
+    }
+    if(!z_in.empty()){
+        PLOGD << "ARG given for zed playback at " << z_in;
+    }
+    if(!model.empty()){
+        PLOGD << "ARG given for AI model is \"" << model << "\"";
+    }
+    if(!m_out.empty()){
+        PLOGD << "ARG given for AI model recording is TRUE with out at " << m_out;
+    }
+    if(m_fps != 15){
+        PLOGD << "ARG given for AI model fps is " << m_fps;
+    }
+    if(confidence_percent != 60){
+        PLOGD << "ARG given for AI confidence percentage is " << confidence_percent << "%";
+    }
+    if(std::strcmp(ip, "0.0.0.0") != 0){
+        PLOGD << "ARG given for IP is [" << ip << "]";
+    }
+    if(port != 8080){
+        PLOGD << "ARG given for PORT is [" << port << "]";
     }
 
 
