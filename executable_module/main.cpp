@@ -272,6 +272,17 @@ void socket_api_stream(DetectedObjects &objs, std::atomic<bool> &running, int de
     close(sockfd);
 }
 
+// void sigintHandler(int sig_num) 
+// { 
+//     cout << "\nTerminating Program... " << endl;
+
+//     //Close sockets
+//     close(sockfd);
+
+//     // Terminate program
+//     exit(signum);
+// } 
+
 
 int main(int argc, const char* argv[]) {
     // Zed arguments
@@ -354,8 +365,8 @@ int main(int argc, const char* argv[]) {
         cam_ptr.reset(new ZED_Camera(z_record, z_res, z_fps, z_out));
     } else {
         cam_ptr.reset(new ZED_Camera(z_in));
-    }
-
+    }    
+    
     // ZED_Camera& cam = *cam_ptr;
     ZED_Camera cam(false);
     Video_Frame frame;
@@ -372,17 +383,24 @@ int main(int argc, const char* argv[]) {
     // Use argument variables
     static std::atomic<bool> running = true;
 
+    //This is for debugging purposes
+    std::cout << "Starting Camera, AI and API Threads" << std::endl;
+    std::cout << "Server: " << ip << std::endl;
+    std::cout << "Port: " << port << std::endl;
+    
+
     // Since threads copy arguments we must pass them by reference.
     std::thread camera_thread(camera_stream, std::ref(cam), std::ref(frame), std::ref(running));
     std::thread ai_thread(ai_stream, std::ref(ai), conf, std::ref(objs), std::ref(frame), std::ref(running));
-    std::thread socket_api_thread(socket_api_stream, std::ref(objs), std::ref(running), std::ref(debugLevel));
+    //std::thread socket_api_thread(socket_api_stream, std::ref(objs), std::ref(running), std::ref(debugLevel));
 
+    std::cout << "Threads Started!!!" << std::endl;
 
     //TO DO: Make socket api be the one that stops the executable
     // api.start(ip, port);
-    // running = false;
+    running = false;
 
-    camera_thread.join();
-    ai_thread.join();
-    socket_api_thread.join();
+    // camera_thread.join();
+    // ai_thread.join();
+    // socket_api_thread.join();
 }
