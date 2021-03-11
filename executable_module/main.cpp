@@ -76,6 +76,7 @@ void print_help() {
     std::cout << "\t-ip 0.0.0.0" << std::endl;
     std::cout << "[OPTIONAL] -p    --port" << std::endl;
     std::cout << "\t-p 8080" << std::endl;
+    std::cout << "[OPTIONAL] -d    --debug" << std::endl;
 }
 
 int main(int argc, const char* argv[]) {
@@ -90,80 +91,118 @@ int main(int argc, const char* argv[]) {
     bool m_record = false;
     int m_fps = 15;
     int confidence_percent = 60;
-    // API Arguments
+    // API arguments
     const char* ip = "0.0.0.0";
     int port = 8080;
-    // Logger Init
-    initPLOG();
+    // Logger arguments
+    // INFO Logger by default
+    std::string maxSeverity = "info";
 
     for (int i = 1; i < argc; i++) {
         std::string arg = std::string(argv[i]);
         if (arg == "-h" || arg == "--help") {
-            PLOGI << "Executing -h command.";
             print_help();
             return 0;
         }
         else if (arg == "-zr" || arg == "--zed_record") {
-            PLOGI << "ARG given for Zed Recording is TRUE.";
             live_zed = true;
             z_out = argv[++i];}
         else if (arg == "-res" || arg == "--resolution") {
             std::string res = argv[++i];
             if (res == "1080") {
-                PLOGI << "ARG given for setting ZED RESOLUTION to HD1080";
                 z_res = sl::RESOLUTION::HD1080;
             }
             else if (res == "2k") {
-                PLOGI << "ARG given for setting ZED RESOLUTION to HD2k";
                 z_res = sl::RESOLUTION::HD2K;
             }
             else if (res == "720") {
-                PLOGI << "ARG given for setting ZED RESOLUTION to HD720";
                 z_res = sl::RESOLUTION::HD720;
             }
             else if (res == "VGA") {
-                PLOGI << "ARG given for setting ZED RESOLUTION to VGA";
                 z_res = sl::RESOLUTION::VGA;
             }
         }
         else if (arg == "-zfps" || arg == "--zed_fps") {
             z_fps = std::stoi(std::string(argv[++i]));
-            PLOGI << "ARG given for setting ZED fps to " << z_fps;
         }
         else if (arg == "-zp" || arg == "--zed_play") {
-            PLOGI << "ARG given for Zed Recording is FALSE.";
             live_zed = false;
             z_in = argv[++i];
         }
         else if (arg == "-m" || arg == "--yolo_model") {
             model = argv[++i];
-            PLOGI << "ARG given for AI model is \"" << model << "\"";
         }
         else if (arg == "-mr" || arg == "--model_record") {
-            PLOGI << "ARG given for AI model recording is TRUE.";
             m_record = true;
             m_out = argv[++i];
         }
         else if (arg == "-mfps" || arg == "--model_fps") {
             m_fps = std::stoi(std::string(argv[++i]));
-            PLOGI << "ARG given for AI model fps is " << m_fps;
         }
         else if (arg == "-c" || arg == "--confidence") {
             confidence_percent = std::stoi(std::string(argv[++i]));
-            PLOGI << "ARG given for AI confidence percentage is " << confidence_percent << "%";
         }
         else if (arg == "-ip") {
             ip = argv[++i];
-            PLOGI << "ARG given for IP is [" << ip << "]";
         }
         else if (arg == "-p" || arg == "--port") {
             port = std::stoi(std::string(argv[++i]));
+        }
+        else if (arg == "-d" || arg == "--debug"){
+            maxSeverity = "debug";
+        }
+    }
+
+
+    // Initialize Logger
+    initPLOG(maxSeverity);
+    // Check what params were given prior to initializing the PLOG
+    PLOGD << "Debug mode has been turned on for LOGGING.";
+    if(maxSeverity == "debug"){ // Informational LOG for DEBUG
+        if(!z_out.empty()){
+            PLOGI << "ARG given for zed recording true and out at " << z_out;
+        }
+        if (z_res == sl::RESOLUTION::HD1080) {
+            PLOGI << "ARG given for setting ZED RESOLUTION to HD1080";
+        }
+        else if (z_res == sl::RESOLUTION::HD2K) {
+            PLOGI << "ARG given for setting ZED RESOLUTION to HD2k";
+        }
+        else if (z_res == sl::RESOLUTION::HD720) {
+            PLOGI << "ARG given for setting ZED RESOLUTION to HD720";
+        }
+        else if (z_res == sl::RESOLUTION::VGA) {
+            PLOGI << "ARG given for setting ZED RESOLUTION to VGA";
+        }
+        if(z_fps != 30){
+            PLOGI << "ZED fps set to " << z_fps;
+        }
+        if(!z_in.empty()){
+            PLOGI << "ARG given for zed playback at " << z_in;
+        }
+        if(!model.empty()){
+            PLOGI << "ARG given for AI model is \"" << model << "\"";
+        }
+        if(!m_out.empty()){
+            PLOGI << "ARG given for AI model recording is TRUE with out at " << m_out;
+        }
+        if(m_fps != 15){
+            PLOGI << "ARG given for AI model fps is " << m_fps;
+        }
+        if(confidence_percent != 60){
+            PLOGI << "ARG given for AI confidence percentage is " << confidence_percent << "%";
+        }
+        if(std::strcmp(ip, "0.0.0.0") != 0){
+            PLOGI << "ARG given for IP is [" << ip << "]";
+        }
+        if(port != 8080){
             PLOGI << "ARG given for PORT is [" << port << "]";
         }
     }
 
+
     // Initialize ZED Cam
-    PLOGI << "Initializing ZED Cam on MAIN.";
+    PLOGI << "Initializing ZED Cam";
     std::shared_ptr<ZED_Camera> cam_ptr;
     if (live_zed) {
         cam_ptr.reset(new ZED_Camera(z_record, z_res, z_fps, z_out));
@@ -175,13 +214,13 @@ int main(int argc, const char* argv[]) {
     Video_Frame frame;
 
     // Initialize AI
-    PLOGI << "Initializing AI on MAIN.";
+    PLOGI << "Initializing AI";
     AI ai(model, m_record, m_out, m_fps);
     DetectedObjects objs;
     float conf = float(confidence_percent) / 100;
 
     // Initialize API
-    PLOGI << "Initializing API on MAIN.";
+    PLOGI << "Initializing API";
     API api(obj_mutex, objs);
 
     // Use argument variables
