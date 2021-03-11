@@ -14,7 +14,8 @@
 project (apimod)
 
 # Make sure PyBind11 is installed and Python3 is found
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+#find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+find_package(PythonLibs 3)
 find_package(pybind11 CONFIG REQUIRED)
 
 # Build target python module
