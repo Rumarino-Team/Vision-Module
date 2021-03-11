@@ -27,7 +27,7 @@ find_library(DARKNET_LIBRARY NAMES dark libdark.so libdarknet.so)
 #find_package(dark REQUIRED)
 
 # Setup HTTP libs
-find_package(httplib REQUIRED)
+#find_package(httplib REQUIRED)
 find_package(nlohmann_json 3.2.0 REQUIRED)
 
 # System libs
