@@ -51,6 +51,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
         mod::pipeline-ai
         mod::darknet-ai
         mod::visual-obj-mod
+        mod::mask-rcnn-ai
         mod::http-api
         )
 
