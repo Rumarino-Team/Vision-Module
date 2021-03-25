@@ -72,33 +72,8 @@ MaskRCNNModule::MaskRCNNModule(std::string input_path, float minimum_confidence,
 
 PipelineErrors MaskRCNNModule::detect(Video_Frame &frame, DetectedObjects &objs) {
 
-    //Predict items from the frame
-    auto predictions = darknet->detect(frame.image, confidence);
 
-    for(auto &prediction : predictions) {
-        DetectedObject result;
-
-        result.bounding_box = cv::Rect(prediction.x, prediction.y, prediction.w, prediction.h);
-        result.id = prediction.obj_id;
-        // Get the name of the detected object; leave it empty if not found
-        if (prediction.obj_id < names.size()) {
-            result.name = names[prediction.obj_id].c_str();
-        }prediction
-        else {
-            result.name = "";
-        }
-
-        result.distance = -1;
-
-        //Saving the 3D point on the struct
-        result.location.x = -1;
-        result.location.y = -1;
-        result.location.z = -1;
-
-        objs.push_back(result);
-    }
-
-    for (auto &object : objs) {
+    for (auto DetectedObjects& obj : objs) {
 
         cv::Mat bounding_box, blob;
 
@@ -106,7 +81,7 @@ PipelineErrors MaskRCNNModule::detect(Video_Frame &frame, DetectedObjects &objs)
         // frame.image(object.bounding_box).copyTo(bounding_box);
 
         // Here, bounding_box is a reference, and thus it can change frame.image
-        bounding_box = frame.image(object.bounding_box);
+        bounding_box = frame.image(obj.bounding_box);
 
         // Create a 4D blob from a frame because the network receives blobs as input
         blobFromImage(bounding_box, blob, 1.0, Size(bounding_box.cols, bounding_box.rows), Scalar(), true, false);
