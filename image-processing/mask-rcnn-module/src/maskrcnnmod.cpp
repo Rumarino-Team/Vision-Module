@@ -12,7 +12,7 @@ MaskRCNNModule::MaskRCNNModule(std::string input_path, float minimum_confidence,
     //Identify the files inside the folder
     for (const auto & entry : std::experimental::filesystem::directory_iterator(input_path)) {
         if (entry.path().has_extension()) {
-            if (entry.path().extension().string() == ".txt") {
+            if (entry.path().extension().string() == ".colors") {
                 colors_path = entry.path().string();
             }
             else if (entry.path().extension().string() == ".names") {
@@ -23,7 +23,7 @@ MaskRCNNModule::MaskRCNNModule(std::string input_path, float minimum_confidence,
             }
 
             // This is not in repo. Must be downloaded from http://download.tensorflow.org/models/object_detection/mask_rcnn_inception_v2_coco_2018_01_28.tar.gz
-            // The file we want is frozen_inference_graph.pb
+            // The file we want is frozen_inference_graph.pb and you have to put it in test/media/MASK-RCNN/MASK-RCNN.pb
             else if (entry.path().extension().string() == ".pb") {
                 weights = entry.path().string();
             }
