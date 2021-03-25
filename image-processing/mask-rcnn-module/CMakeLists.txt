@@ -1,9 +1,9 @@
 # Set the project name
-project (maskrcnn_module)
+project (mask_rcnn_module)
 
 # Add a library with the above sources
 add_library(${PROJECT_NAME} src/maskrcnnmod.cpp)
-add_library(mod::maskrcnn-ai ALIAS ${PROJECT_NAME})
+add_library(mod::mask-rcnn-ai ALIAS ${PROJECT_NAME})
 
 target_include_directories( ${PROJECT_NAME}
         PUBLIC ${PROJECT_SOURCE_DIR}/include
