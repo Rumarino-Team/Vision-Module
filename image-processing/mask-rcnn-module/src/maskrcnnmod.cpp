@@ -47,11 +47,13 @@ MaskRCNNModule::MaskRCNNModule(std::string input_path, float minimum_confidence,
     //Get the names inside the file
     std::ifstream colors_file;
     colors_file.open(colors_path.c_str());
-    if(!nacolors_filemes_file) {
+    if(!colors_file) {
         std::cout << "[AI] [ERROR] No .txt file for colors found";
     }
     else {
-        while (getline(colors_file, line)) {
+        std::string line;
+        if(!colors_file.eof()) {
+            getline(colors_file, line);
             char* pEnd;
             double r, g, b;
             r = strtod (line.c_str(), &pEnd);
@@ -73,7 +75,7 @@ MaskRCNNModule::MaskRCNNModule(std::string input_path, float minimum_confidence,
 PipelineErrors MaskRCNNModule::detect(Video_Frame &frame, DetectedObjects &objs) {
 
 
-    for (auto DetectedObjects& obj : objs) {
+    for (auto obj : objs) {
 
         cv::Mat bounding_box, blob;
 

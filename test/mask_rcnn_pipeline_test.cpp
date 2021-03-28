@@ -16,24 +16,6 @@ std::string in_video = "media/test_input_video.svo";
 std::string yolo_model_input_path = "media/RUBBER-DUCKY";
 std::string mask_rcnn_input_path = "media/MASK-RCNN";
 
-TEST(Darknet, File_Checker) {
-    std::vector <std::string> tokens;
-    std::stringstream charToString(yolo_model_input_path);
-    std::string intermediate;
-    while(getline(charToString, intermediate, '/'))
-        if(!intermediate.empty() && intermediate != " ")
-            tokens.push_back(intermediate);
-    std::string dir_name = tokens.back();
-
-    std::string yolo_cfg = yolo_model_input_path + "/" + dir_name + ".cfg";
-    std::string yolo_weights = yolo_model_input_path + "/weights/" + dir_name + "_best.weights";
-    std::string yolo_names = yolo_model_input_path + "/custom.names";
-
-    EXPECT_TRUE(file_exists(cfg.c_str()));
-    EXPECT_TRUE(file_exists(weights.c_str()));
-    EXPECT_TRUE(file_exists(names.c_str()));
-}
-
 TEST(MaskRCNN, File_Checker) {
     std::vector <std::string> tokens;
     std::stringstream charToString(mask_rcnn_input_path);
@@ -86,7 +68,6 @@ TEST(Pipeline, MaskRCNN_Masking) {
 Video_Frame threaded_frame;
 std::mutex frame_mutex;
 std::condition_variable new_frame;
-std::condition_variable new_detect;
 
 
 void camera_stream(ZED_Camera *cam, std::atomic<bool> &running) {
