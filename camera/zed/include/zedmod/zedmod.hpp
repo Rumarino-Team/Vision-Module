@@ -2,6 +2,7 @@
 #define __ZED_MODULE__
 #include <sl/Camera.hpp>
 #include <opencv2/opencv.hpp>
+#include "loggermod/loggermod.hpp"
 
 /**
  * To prevent using the Zed API outside the ZED_Camera, everything is converted to OpenCV format
