@@ -42,6 +42,7 @@ add_subdirectory(camera)
 add_subdirectory(image-processing)
 add_subdirectory(api)
 add_subdirectory(executable_module)
+add_subdirectory(logger_module)
 
 option(RUN_TESTS "Build the tests" off)
 
