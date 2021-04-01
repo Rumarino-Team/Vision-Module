@@ -1,4 +1,4 @@
-#include "./loggermod.hpp"
+#include "loggermod/loggermod.hpp"
 
 // Default name of file is RUM_log.txt
 std::string filename = "RUM_log-";

@@ -13,6 +13,7 @@ target_include_directories( ${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
         mod::zed
         mod::pipeline-ai
+        mod::logger
         ${SPECIAL_OS_LIBS}
         ${OpenCV_LIBS}
         ${DARKNET_LIBRARY}

@@ -4,13 +4,16 @@ DarknetModule::DarknetModule(std::string input_path, float minimum_confidence) :
     std::string cfg, weights, names_path;
 
     //Identify the files inside the folder
+    PLOGD << "Finding .cfg, .names, and .weights files...";
     for (const auto & entry : std::experimental::filesystem::directory_iterator(input_path)) {
         if (entry.path().has_extension()) {
             if (entry.path().extension().string() == ".cfg") {
                 cfg = entry.path().string();
+                PLOGD << "Found .cfg file at " + cfg;
             }
             else if (entry.path().extension().string() == ".names") {
                 names_path = entry.path().string();
+                PLOGD << "Found .names file at " + names_path;
             }
         }
         else if (entry.path().stem().string() == "weights") {
@@ -19,6 +22,7 @@ DarknetModule::DarknetModule(std::string input_path, float minimum_confidence) :
                 //TODO: for now we only look for the best weights, there must be a better way
                 if (weight_str.substr(weight_str.length() - 5) == "_best") {
                     weights = all_weights.path().string();
+                    PLOGD << "Found .weights file at " + weights;
                     break;
                 }
             }
@@ -37,10 +41,12 @@ DarknetModule::DarknetModule(std::string input_path, float minimum_confidence) :
             getline(names_file, name);
             names.push_back(name);
         }
+        names_file.close();
     }
 
     // Load darknet
     darknet = new Detector(cfg, weights);
+    PLOGI << "Finished initializing darknet AI module";
 }
 
 PipelineErrors DarknetModule::detect(Video_Frame &frame, DetectedObjects &objs) {
@@ -48,6 +54,7 @@ PipelineErrors DarknetModule::detect(Video_Frame &frame, DetectedObjects &objs) 
     //Predict items from the frame
     auto predictions = darknet->detect(frame.image, confidence);
 
+    PLOGD << "Detecting objects from predictions...";
     for(auto &prediction : predictions) {
         DetectedObject result;
 
@@ -70,6 +77,7 @@ PipelineErrors DarknetModule::detect(Video_Frame &frame, DetectedObjects &objs) 
 
         objs.push_back(result);
     }
+    PLOGD << "Finished detecting objects.";
 
     return None;
 }

@@ -3,6 +3,7 @@
 #include <experimental/filesystem>
 #include <yolo_v2_class.hpp>
 #include "pipelinemod/pipelinemod.hpp"
+#include "loggermod/loggermod.hpp"
 
 
 class DarknetModule : public PipelineModule {
