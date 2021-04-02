@@ -52,6 +52,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
         mod::darknet-ai
         mod::visual-obj-mod
         mod::http-api
+        mod::logger
         )
 
 add_test(NAME ${PROJECT_NAME} COMMAND ${PROJECT_NAME})
