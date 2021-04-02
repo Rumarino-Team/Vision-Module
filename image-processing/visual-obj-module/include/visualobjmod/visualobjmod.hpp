@@ -1,6 +1,7 @@
 #ifndef __VISUAL_OBJ_MODULE__
 #define __VISUAL_OBJ_MODULE__
 #include "pipelinemod/pipelinemod.hpp"
+#include "loggermod/loggermod.hpp"
 
 class VisualObjModule : public PipelineModule {
 public:

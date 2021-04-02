@@ -17,6 +17,24 @@ PipelineErrors VisualObjModule::detect(Video_Frame &frame, DetectedObjects &objs
     // |             | (x, y, z)
     // |             |
     //  -------------
+
+    std::vector<std::string> to_log;
+    if (boundingBox) { to_log.emplace_back("BOUNDING BOX"); }
+    if (objectName) { to_log.emplace_back("OBJECT NAME"); }
+    if (boxCoords) { to_log.emplace_back("BOX COORDS"); }
+    if (distance) { to_log.emplace_back("DISTANCE"); }
+    if (location) { to_log.emplace_back("LOCATION"); }
+    std::string log = " ";
+    for (auto s: to_log){
+        log += s + " ";
+    }
+    if(to_log.empty()){
+        PLOGD << "NOT ADDING ANYTHING TO FRAMES.";
+    }
+    else {
+        PLOGD << "ADDING [" + log + "] TO FRAMES.";
+    }
+
     int spacing = 20;
     for (const DetectedObject& obj : objs) {
         if (boundingBox) {
@@ -46,5 +64,6 @@ PipelineErrors VisualObjModule::detect(Video_Frame &frame, DetectedObjects &objs
                         cv::FONT_HERSHEY_COMPLEX_SMALL, 1.0, color, 2);
         }
     }
+
     return None;
 }
