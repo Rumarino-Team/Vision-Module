@@ -5,6 +5,7 @@
 #include <mutex>
 #include <atomic>
 #include "pipelinemod/pipelinemod.hpp"
+#include "loggermod/loggermod.hpp"
 
 class API {
 public:

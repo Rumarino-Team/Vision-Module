@@ -13,4 +13,5 @@ target_include_directories( ${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
         mod::pipeline-ai
         httplib::httplib
+        mod::logger
         nlohmann_json::nlohmann_json)
