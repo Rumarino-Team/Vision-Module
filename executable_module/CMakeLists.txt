@@ -10,4 +10,5 @@ target_link_libraries(${PROJECT_NAME}
     mod::darknet-ai
     mod::visual-obj-mod
     mod::http-api
+    mod::logger
 )

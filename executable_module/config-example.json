@@ -32,6 +32,10 @@
           "thickness": 4
         }
       ]
+    },
+    {
+      "module": "logger",
+      "maxseverity": "info"
     }
   ]
 }

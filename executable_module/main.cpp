@@ -8,6 +8,7 @@
 #include "darknetmod/darknetmod.hpp"
 #include "visualobjmod/visualobjmod.hpp"
 #include "httpapimod/apimod.hpp"
+#include "loggermod/loggermod.hpp"
 
 using json = nlohmann::json;
 
@@ -29,6 +30,7 @@ void camera_stream(ZED_Camera &cam, Video_Frame &frame, std::atomic<bool> &runni
         std::this_thread::sleep_for(std::chrono::microseconds (1));
     }
     cam.close();
+    PLOGI << "Stopped CAMERA_STREAM thread.";
 }
 
 void pipeline_stream(PipelineManager &pipelineManager, DetectedObjects &objs, Video_Frame &frame, std::atomic<bool> &running) {
@@ -51,6 +53,7 @@ void pipeline_stream(PipelineManager &pipelineManager, DetectedObjects &objs, Vi
         obj_lock.unlock();
     }
     pipelineManager.close();
+    PLOGI << "Stopped AI_STREAM thread.";
 }
 void print_help() {
     std::cout << "A background artificial intelligence with a custom image processing pipeline.\n\n"
@@ -70,6 +73,9 @@ int main(int argc, const char* argv[]) {
     // API Arguments
     const char* ip = "0.0.0.0";
     int port = 8080;
+
+    // Logger Arguments
+    std::string maxseverity = "info";
 
     for (int i = 1; i < argc; i++) {
         std::string arg = std::string(argv[i]);
@@ -154,21 +160,31 @@ int main(int argc, const char* argv[]) {
                             }
                         }
                     }
+
+                    else if (module["module"] == "logger"){
+                        maxseverity = module["maxseverity"];
+                    }
                 }
 
             }
         }
     }
 
+    // Initialize LOGGER
+    initPLOG(maxseverity);
+
     // Initialize ZED Cam
+    PLOGI << "Initializing ZED Camera";
     ZED_Camera& cam = *cam_ptr;
     Video_Frame frame;
 
     // Initialize AI
+    PLOGI << "Initializing AI";
     PipelineManager pipelineManager(pipeline, p_record, p_out, p_fps);
     DetectedObjects objs;
 
     // Initialize API
+    PLOGI << "Initializing API";
     API api(obj_mutex, objs);
 
     // Use argument variables
