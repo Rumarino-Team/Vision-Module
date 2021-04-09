@@ -130,45 +130,60 @@ PipelineErrors MaskRCNNModule::detect(Video_Frame &frame, DetectedObjects &objs)
                 right = max(0, min(right, bounding_box.cols - 1));
                 bottom = max(0, min(bottom, bounding_box.rows - 1));
                 Rect box = Rect(left, top, right - left + 1, bottom - top + 1);
-                
-                // Extract the mask for the object
-                cv::Mat objectMask(outMasks.size[2], outMasks.size[3],CV_32F, outMasks.ptr<float>(i,classId));
-                
-                //Draw a rectangle displaying the bounding box
-                rectangle(bounding_box, Point(box.x, box.y), Point(box.x+box.width, box.y+box.height), Scalar(255, 178, 50), 3);
-                
 
-                //Get the label for the class name and its confidence
-                std::string label = format("%.2f", score);
-                if (!names.empty())
-                {
-                    CV_Assert(classId < (int)names.size());
-                    label = names[classId] + ":" + label;
+                // Makes sure ROI is valid
+                if (box.width > 0 && box.height > 0 && box.x >= 0 && box.y >= 0 && box.x + box.width <= bounding_box.cols && box.y + box.height <= bounding_box.rows) {
+
+                    // Extract the mask for the object
+                    cv::Mat objectMask(outMasks.size[2], outMasks.size[3],CV_32F, outMasks.ptr<float>(i,classId));
+                    
+                    //Draw a rectangle displaying the bounding box
+                    rectangle(bounding_box, Point(box.x, box.y), Point(box.x + box.width, box.y + box.height), Scalar(255, 178, 50), 3);
+
+                    //Get the label for the class name and its confidence
+                    std::string label = format("%.2f", score);
+                    if (!names.empty())
+                    {
+                        CV_Assert(classId < (int)names.size());
+                        label = names[classId] + ":" + label;
+                    }
+                    
+                    //Display the label at the top of the bounding box
+                    int baseLine;
+                    Size labelSize = getTextSize(label, FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+
+                    // Fixes ROI dimension problems
+                    int tempY = max(box.y, labelSize.height);
+                    if (tempY + box.height <= bounding_box.rows) {
+                        box.y = tempY;
+                    }
+                    
+                    rectangle(bounding_box, Point(box.x, box.y - round(1.5*labelSize.height)), Point(box.x + round(1.5*labelSize.width), box.y + baseLine), Scalar(255, 255, 255), FILLED);
+                    
+                    putText(bounding_box, label, Point(box.x, box.y), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(0,0,0),1);
+
+
+                    // Scalar color = colors[classId%colors.size()];
+
+                    // Generate random color per instance
+                    int colorInd = std::rand() % colors.size();
+	                Scalar color = colors[colorInd];
+                    
+
+                    // Resize the mask, threshold, color and apply it on the image
+                    resize(objectMask, objectMask, Size(box.width, box.height));
+                    Mat mask = (objectMask > mask_threshold);
+                    Mat coloredRoi = (0.3 * color + 0.7 * bounding_box(box));
+                    coloredRoi.convertTo(coloredRoi, CV_8UC3);
+
+                    // Draw the contours on the image
+                    std::vector<cv::Mat> contours;
+                    cv::Mat hierarchy;
+                    mask.convertTo(mask, CV_8U);
+                    findContours(mask, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
+                    drawContours(coloredRoi, contours, -1, color, 5, LINE_8, hierarchy, 100);
+                    coloredRoi.copyTo(bounding_box(box), mask);
                 }
-                
-                //Display the label at the top of the bounding box
-                int baseLine;
-                Size labelSize = getTextSize(label, FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
-                box.y = max(box.y, labelSize.height);
-                rectangle(bounding_box, Point(box.x, box.y - round(1.5*labelSize.height)), Point(box.x + round(1.5*labelSize.width), box.y + baseLine), Scalar(255, 255, 255), FILLED);
-                putText(bounding_box, label, Point(box.x, box.y), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(0,0,0),1);
-
-                Scalar color = colors[classId%colors.size()];
-                
-                // Resize the mask, threshold, color and apply it on the image
-                resize(objectMask, objectMask, Size(box.width, box.height));
-                Mat mask = (objectMask > mask_threshold);
-                Mat coloredRoi = (0.3 * color + 0.7 * bounding_box(box));
-                coloredRoi.convertTo(coloredRoi, CV_8UC3);
-
-                // Draw the contours on the image
-                std::vector<cv::Mat> contours;
-                cv::Mat hierarchy;
-                mask.convertTo(mask, CV_8U);
-                findContours(mask, contours, hierarchy, RETR_CCOMP, CHAIN_APPROX_SIMPLE);
-                drawContours(coloredRoi, contours, -1, color, 5, LINE_8, hierarchy, 100);
-                coloredRoi.copyTo(bounding_box(box), mask);
-
             }
         }
 
