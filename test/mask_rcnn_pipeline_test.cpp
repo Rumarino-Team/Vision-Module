@@ -11,28 +11,28 @@
 #include "visualobjmod/visualobjmod.hpp"
 #include "tools.hpp"
 
-std::string in_video = "media/test_input_video.svo";
+std::string in_video_2 = "media/test_input_video.svo";
 
 std::string yolo_model_input_path = "media/RUBBER-DUCKY";
 std::string mask_rcnn_input_path = "media/MASK-RCNN";
 
-TEST(Darknet, File_Checker) {
-    std::vector <std::string> tokens;
-    std::stringstream charToString(yolo_model_input_path);
-    std::string intermediate;
-    while(getline(charToString, intermediate, '/'))
-        if(!intermediate.empty() && intermediate != " ")
-            tokens.push_back(intermediate);
-    std::string dir_name = tokens.back();
+// TEST(Darknet, File_Checker) {
+//     std::vector <std::string> tokens;
+//     std::stringstream charToString(yolo_model_input_path);
+//     std::string intermediate;
+//     while(getline(charToString, intermediate, '/'))
+//         if(!intermediate.empty() && intermediate != " ")
+//             tokens.push_back(intermediate);
+//     std::string dir_name = tokens.back();
 
-    std::string yolo_cfg = yolo_model_input_path + "/" + dir_name + ".cfg";
-    std::string yolo_weights = yolo_model_input_path + "/weights/" + dir_name + "_best.weights";
-    std::string yolo_names = yolo_model_input_path + "/custom.names";
+//     std::string yolo_cfg = yolo_model_input_path + "/" + dir_name + ".cfg";
+//     std::string yolo_weights = yolo_model_input_path + "/weights/" + dir_name + "_best.weights";
+//     std::string yolo_names = yolo_model_input_path + "/custom.names";
 
-    EXPECT_TRUE(file_exists(cfg.c_str()));
-    EXPECT_TRUE(file_exists(weights.c_str()));
-    EXPECT_TRUE(file_exists(names.c_str()));
-}
+//     EXPECT_TRUE(file_exists(cfg.c_str()));
+//     EXPECT_TRUE(file_exists(weights.c_str()));
+//     EXPECT_TRUE(file_exists(names.c_str()));
+// }
 
 TEST(MaskRCNN, File_Checker) {
     std::vector <std::string> tokens;
@@ -83,20 +83,20 @@ TEST(Pipeline, MaskRCNN_Masking) {
 // The multithreading here is simple and technically linear
 // But since where only testing the AI part this is ok
 // Multithreading is in response to ZED and Darknet not being able to run in the same thread
-Video_Frame threaded_frame;
-std::mutex frame_mutex;
-std::condition_variable new_frame;
-std::condition_variable new_detect;
+Video_Frame threaded_frame_2;
+std::mutex frame_mutex_2;
+std::condition_variable new_frame_2;
+std::condition_variable new_detect_2;
 
 
-void camera_stream(ZED_Camera *cam, std::atomic<bool> &running) {
+void camera_stream_2(ZED_Camera *cam, std::atomic<bool> &running) {
     while(running) {
         auto start = std::chrono::high_resolution_clock::now();
 
-        std::unique_lock<std::mutex> frame_lock(frame_mutex);
-        threaded_frame = cam->update();
+        std::unique_lock<std::mutex> frame_lock(frame_mutex_2);
+        threaded_frame_2 = cam->update();
         frame_lock.unlock();
-        new_frame.notify_one();
+        new_frame_2.notify_one();
 
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
@@ -105,8 +105,8 @@ void camera_stream(ZED_Camera *cam, std::atomic<bool> &running) {
     }
 }
 
-TEST(Pipeline, Multi_Threading) {
-    ZED_Camera cam(in_video);
+TEST(Pipeline, Mask_RCNN_Multi_Threading) {
+    ZED_Camera cam(in_video_2);
     std::string out_video = "media/ai_output.avi";
 
     Pipeline pipeline;
@@ -126,15 +126,15 @@ TEST(Pipeline, Multi_Threading) {
     PipelineManager ai(pipeline, true, out_video);
 
     static std::atomic<bool> running = true;
-    std::thread camera_thread(camera_stream, &cam, std::ref(running));
+    std::thread camera_thread(camera_stream_2, &cam, std::ref(running));
 
     for (int i=0; i < 500; i++) {
 
         auto start = std::chrono::high_resolution_clock::now();
 
-        std::unique_lock<std::mutex> frame_lock(frame_mutex);
-        new_frame.wait(frame_lock);
-        DetectedObjects threaded_obj = ai.detect(threaded_frame);
+        std::unique_lock<std::mutex> frame_lock(frame_mutex_2);
+        new_frame_2.wait(frame_lock);
+        DetectedObjects threaded_obj = ai.detect(threaded_frame_2);
         frame_lock.unlock();
 
         auto stop = std::chrono::high_resolution_clock::now();
