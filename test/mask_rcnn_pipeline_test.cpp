@@ -41,10 +41,11 @@ TEST(Pipeline, MaskRCNN_Masking) {
     DarknetModule darkMod(yolo_model_input_path, 0.60);
     MaskRCNNModule maskRCNNMod(mask_rcnn_input_path, 0.5, 0.3);
 
+    std::string out_video = "media/ai_pipeline_output.avi";
 
     // Create the pipeline manager
     Pipeline pipeline = {&darkMod, &maskRCNNMod};
-    PipelineManager ai(pipeline, false);
+    PipelineManager ai(pipeline, true, out_video);
 
     cv::VideoCapture cap("media/test_video.mp4");
     EXPECT_TRUE(cap.isOpened());
