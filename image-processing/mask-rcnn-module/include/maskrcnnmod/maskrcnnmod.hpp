@@ -36,9 +36,9 @@ private:
     // The object names
     std::vector<std::string> names;
     // The colors
-    std::vector<Scalar> colors;
+    std::vector<cv::Scalar> colors;
     // Network
-    cv::dnn::Net* maskrcnn;
+    cv::dnn::Net maskrcnn;
     // Model confidence
     float confidence_threshold;
     // Model mask threshold
