@@ -13,16 +13,31 @@
 
 #include "pipelinemod/pipelinemod.hpp"
 
+/**
+ * Will subdivide the image into regions to find the center
+ *
+ * @param mask The image mask
+ * @return A point for the object center
+ */
+cv::Point2i getCenter(cv::Mat& mask);
+
 class MaskRCNNModule : public PipelineModule {
 public:
+    typedef std::function<cv::Point2i(cv::Mat&)> MaskRCNNFunction;
     /**
      * Reads the model and initializes the model.
      *
      * @param input_path The path to folder with the model, model graph and names and colors file
      * @param confidence_threshold The confidence threshold
+     * @param calculate_location Use the mask information to calculate object distance and 3D location
+     * @param func Function used to calculate the objects location
+     * @param mask_image Write the mask on top of the image
      * @param mask_threshold The mask threshold
      */
-    MaskRCNNModule(std::string input_path, float minimum_confidence, float minimum_mask);
+    MaskRCNNModule(const std::string& input_path, float minimum_confidence, bool calculate_location = true,
+                   MaskRCNNFunction func = getCenter, bool mask_image = true, float minimum_mask = 0.3);
+
+    ~MaskRCNNModule();
 
     /**
      * Detects the objects in the image using Darknet
@@ -38,10 +53,12 @@ private:
     // The colors
     std::vector<cv::Scalar> colors;
     // Network
-    cv::dnn::Net maskrcnn;
-    // Model confidence
-    float confidence_threshold;
-    // Model mask threshold
-    float mask_threshold;
+    cv::dnn::Net*  maskrcnn;
+    // Mask function
+    MaskRCNNFunction mask_function;
+    // Model confidence and mask threshold
+    float confidence_threshold, mask_threshold;
+    // Calculate object location and draw mask on image
+    bool get_location, mask_image;
 };
 #endif

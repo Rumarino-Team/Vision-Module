@@ -16,7 +16,7 @@ std::string in_video_2 = "media/test_input_video.svo";
 std::string yolo_model_input_path = "media/RUBBER-DUCKY";
 std::string mask_rcnn_input_path = "media/MASK-RCNN";
 
-TEST(MaskRCNN, File_Checker) {
+TEST(File_Checker, MaskRCNN) {
     std::vector <std::string> tokens;
     std::stringstream charToString(mask_rcnn_input_path);
     std::string intermediate;
@@ -26,8 +26,8 @@ TEST(MaskRCNN, File_Checker) {
     std::string dir_name = tokens.back();
 
     std::string mask_rcnn_graph = mask_rcnn_input_path + "/" + dir_name + ".pbtxt";
-    std::string mask_rcnn_weights = mask_rcnn_input_path + "/" + dir_name + ".pb";;
-    std::string mask_rcnn_names = mask_rcnn_input_path + "/" + dir_name + ".names";;
+    std::string mask_rcnn_weights = mask_rcnn_input_path + "/" + dir_name + ".pb";
+    std::string mask_rcnn_names = mask_rcnn_input_path + "/" + dir_name + ".names";
     std::string mask_rcnn_colors = mask_rcnn_input_path + "/" + dir_name + ".colors";
 
     EXPECT_TRUE(file_exists(mask_rcnn_graph.c_str()));
@@ -41,7 +41,7 @@ TEST(Pipeline, MaskRCNN_Masking) {
     DarknetModule darkMod(yolo_model_input_path, 0.60);
     MaskRCNNModule maskRCNNMod(mask_rcnn_input_path, 0.5, 0.3);
 
-    std::string out_video = "media/ai_pipeline_output.avi";
+    std::string out_video = "media/rcnn_output.avi";
 
     // Create the pipeline manager
     Pipeline pipeline = {&darkMod, &maskRCNNMod};
@@ -62,63 +62,25 @@ TEST(Pipeline, MaskRCNN_Masking) {
     }
 }
 
-// Declare thread functions
-// The multithreading here is simple and technically linear
-// But since where only testing the AI part this is ok
-// Multithreading is in response to ZED and Darknet not being able to run in the same thread
-Video_Frame threaded_frame_2;
-std::mutex frame_mutex_2;
-std::condition_variable new_frame_2;
-
-
-void camera_stream_2(ZED_Camera *cam, std::atomic<bool> &running) {
-    while(running) {
-        auto start = std::chrono::high_resolution_clock::now();
-
-        std::unique_lock<std::mutex> frame_lock(frame_mutex_2);
-        threaded_frame_2 = cam->update();
-        frame_lock.unlock();
-        new_frame_2.notify_one();
-
-        auto stop = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-        int zed_time_per_frame = duration.count();
-        std::cout << "Camera stream is going at " << 1000000/zed_time_per_frame << " fps." << std::endl;
-    }
-}
-
-TEST(Pipeline, Mask_RCNN_Multi_Threading) {
+TEST(Pipeline, MaskRCNN_Module) {
     ZED_Camera cam(in_video_2);
-    std::string out_video = "media/ai_output.avi";
-
-    Pipeline pipeline;
-
-    // Create the darknet pipeline module
-    float confidence = 0.60;
-    pipeline.push_back(new DarknetModule(yolo_model_input_path, confidence));
-
-    // // Create the image writing pipeline module
-    // pipeline.push_back(new VisualObjModule());
+    std::string out_video = "media/rcnn_multithreaded_output.avi";
 
     // Add MaskRCNN to pipeline
     float confidence_threshold = 0.5;
-    float mask_threshold = 0.3;
-    pipeline.push_back(new MaskRCNNModule(mask_rcnn_input_path, confidence_threshold, mask_threshold));
+    MaskRCNNModule maskRCNNMod(mask_rcnn_input_path, confidence_threshold);
+
+    Pipeline pipeline = {&maskRCNNMod};
+    pipeline.push_back(new VisualObjModule());
 
     PipelineManager ai(pipeline, true, out_video);
 
-    static std::atomic<bool> running = true;
-    std::thread camera_thread(camera_stream_2, &cam, std::ref(running));
-
-    for (int i=0; i < 500; i++) {
+    for (int i=0; i < 30; i++) {
 
         auto start = std::chrono::high_resolution_clock::now();
 
-        std::unique_lock<std::mutex> frame_lock(frame_mutex_2);
-        new_frame_2.wait(frame_lock);
-        DetectedObjects threaded_obj = ai.detect(threaded_frame_2);
-        frame_lock.unlock();
-
+        Video_Frame frame = cam.update();
+        DetectedObjects threaded_obj = ai.detect(frame);
         auto stop = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
         int ai_time_per_frame = duration.count();
@@ -131,13 +93,9 @@ TEST(Pipeline, Mask_RCNN_Multi_Threading) {
             std::cout << "\tObject Name: " << obj.name << std::endl;
             std::cout << "\tDistance: " << obj.distance << std::endl;
             std::cout << "\tLocation: (" << obj.location.x << ", " << obj.location.y << ", " << obj.location.z << " )\n" << std::endl;
-            //EXPECT_TRUE();
         }
         std::cout << "}" << std::endl;
     }
-    //Close the threads
-    running = false;
-    camera_thread.join();
     // Close the objects
     ai.close();
     cam.close();
