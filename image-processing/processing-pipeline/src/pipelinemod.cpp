@@ -16,8 +16,8 @@ PipelineManager::PipelineManager(Pipeline &pipeline, bool record, const std::str
 
 DetectedObjects PipelineManager::detect(Video_Frame &frame) {
     DetectedObjects objs;
-
     //At the moment the frame.image gets edited via each pass through
+    cv::cvtColor(frame.image, frame.image, cv::COLOR_BGRA2BGR);
 
     for (auto module : pipeline) {
         module->detect(frame, objs);
@@ -25,9 +25,7 @@ DetectedObjects PipelineManager::detect(Video_Frame &frame) {
 
     if(recording) {
         // Must do the cvt color to change color space
-        cv::Mat record_img;
-        cv::cvtColor(frame.image, record_img, cv::COLOR_BGRA2BGR);
-        out_vid.write(record_img);
+        out_vid.write(frame.image);
     }
 
     return objs;

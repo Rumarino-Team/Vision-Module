@@ -38,6 +38,8 @@ public:
      */
     explicit PipelineModule(const char* name);
 
+    const char* getName() { return name; }
+
     /**
      * Detector or image enhancer
      *
