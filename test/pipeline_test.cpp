@@ -14,7 +14,7 @@ std::string in_video = "media/test_input_video.svo";
 
 std::string input_path = "media/RUBBER-DUCKY";
 
-TEST(Darknet, File_Checker) {
+TEST(File_Checker, Darknet) {
     std::vector <std::string> tokens;
     std::stringstream charToString(input_path);
     std::string intermediate;
@@ -32,7 +32,7 @@ TEST(Darknet, File_Checker) {
     EXPECT_TRUE(file_exists(names.c_str()));
 }
 
-TEST(Pipeline, Darknet_Video_Detection) {
+TEST(Pipeline, Darknet_Module) {
     // Create the darknet pipeline module
     DarknetModule darkMod(input_path, 0.60);
 
@@ -83,7 +83,7 @@ void camera_stream(ZED_Camera *cam, std::atomic<bool> &running) {
 
 TEST(Pipeline, Multi_Threading) {
     ZED_Camera cam(in_video);
-    std::string out_video = "media/ai_output.avi";
+    std::string out_video = "media/darknet_output.avi";
 
     Pipeline pipeline;
 
