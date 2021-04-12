@@ -12,7 +12,9 @@ public:
      *
      * @param input_path The pre-trained YOLO model folder
      */
-    DarknetModule(std::string input_path, float minimum_confidence);
+    DarknetModule(const std::string& input_path, float minimum_confidence);
+
+    ~DarknetModule();
 
     /**
      * Detects the objects in the image using Darknet

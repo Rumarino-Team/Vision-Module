@@ -1,6 +1,6 @@
 #include "darknetmod/darknetmod.hpp"
 
-DarknetModule::DarknetModule(std::string input_path, float minimum_confidence) : PipelineModule("Darknet"), confidence(minimum_confidence) {
+DarknetModule::DarknetModule(const std::string& input_path, float minimum_confidence) : PipelineModule("Darknet"), confidence(minimum_confidence) {
     std::string cfg, weights, names_path;
 
     //Identify the files inside the folder
@@ -72,4 +72,8 @@ PipelineErrors DarknetModule::detect(Video_Frame &frame, DetectedObjects &objs) 
     }
 
     return None;
+}
+
+DarknetModule::~DarknetModule() {
+    delete darknet;
 }
