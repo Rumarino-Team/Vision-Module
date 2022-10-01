@@ -17,7 +17,7 @@
 
  * Better Solution:
  * Also we can just use the DetectRes data directly without  using this class. After all
- * what we're going to return in the AI class will be  a CustomBoxObjectData. Deleting this class
+ * what we're going to return in the AI class will be  a CustomBoxObjectData. Deleting this class will be optimal.
  */
 
 
@@ -26,6 +26,7 @@
  * We are going to change  the type of the vector from DetectedObject
  * to CustomBoxObjectData.
  */
+using CustomDetectedObjects = std::vector<CustomBoxObjectData>;
 /**
  * Object Detection and Segmentation wrapper
  */
@@ -78,7 +79,7 @@ public:
          * @param frame The input image
          * @return CustomBoxObjectData where each DetectedObject only contains bounding_box, id and name
          */
-        CustomBoxObjectData detect(cv::Mat &frame);
+        CustomBoxObjectData detect(Video_Frame &frame);
 
         /*
          * Closes the AI, and if recording, closes the camera stream.
@@ -125,12 +126,14 @@ public:
 // This will mean that we will not include all the information in DetectedObjects class. Instead 
 // DetectedObjects will be a placeholder for giving the Information to the Zed Module
 
-// Solution!!
+
 // After reading about multithreathing all execute with a Client Server architecture using conditional variables
 // for the task. The AI stream wait for the frame mutex with a conditional_variable that use wait. For aclaration
 // wait is a function that wait for a notification that the code can now run. Wait unlock the pass mutex so that
 // it can prevent a deadlock, a set to work the other threads.
 
+
+// Solution!!
 // The solution is that we are going to pass the Zed_Camera to the AI_Stream and calculate from there the Objects.
 // The code has already implemented a good system for waiting for the data to appear. The API does not use a conditional variable.
 // Because the only thing it does is reading the data not modifying it.

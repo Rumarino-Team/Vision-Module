@@ -188,7 +188,7 @@ void ZED_Camera::init(bool record, const std::string &playback_video, const std:
 
 ZED_Camera::~ZED_Camera() { this->close(); }
 
-Objects ZED_Camera::Zed_Inference(CustomBoxObjectData &CustomObject){
+sl::Objects ZED_Camera::Zed_Inference(CustomBoxObjectData &CustomObject){
     Objects objects;
     zed.ingestCustomBoxObjects(CustomObject);
     zed.retrieveObjects(objects, detection_parameters_rt);
@@ -216,6 +216,7 @@ Video_Frame ZED_Camera::update() {
 
     return new_frame;
 }
+
 
 void ZED_Camera::close() {
     if (recording) {

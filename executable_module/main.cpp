@@ -28,7 +28,8 @@ void camera_stream(ZED_Camera &cam, Video_Frame &frame, std::atomic<bool> &runni
     cam.close();
 }
 
-void ai_stream(AI &ai, DetectedObjects &objs, Video_Frame &frame, std::atomic<bool> &running, Zec_Camera & cam) {
+void ai_stream(AI &ai, DetectedObjects &objs, Video_Frame &frame, std::atomic<bool> &running,
+                 Zec_Camera & cam, CustomDetectedObjects custom_objs) {
     // Stop the thread properly
     while (running) {
         // Handle new frame
@@ -40,11 +41,8 @@ void ai_stream(AI &ai, DetectedObjects &objs, Video_Frame &frame, std::atomic<bo
 
         // Handle new object
         std::unique_lock<std::mutex> obj_lock(obj_mutex);
-        objs = ai.detect(frame_copy);
-        objs = cam.Zed_Inference(objs)
-
-
-        new_obj.notify_one();
+        custom_objs = ai.detect(frame_copy);
+        objs = cam.Zed_Inference(custom_objs);
         obj_lock.unlock();
     }
     ai.close();
@@ -137,6 +135,7 @@ int main(int argc, const char* argv[]) {
             m_fps = std::stoi(std::string(argv[++i]));
         }
         // Current detector does not make treshold of confidence level.
+        // I think Zed API does that.
         else if (arg == "-c" || arg == "--confidence") {
             confidence_percent = std::stoi(std::string(argv[++i]));
         }
@@ -166,9 +165,13 @@ int main(int argc, const char* argv[]) {
 
     // Initialize AI
     AI ai(model, m_record, m_out, m_fps);
-    float conf = float(confidence_percent) / 100;
+    float conf = confidence_percent;
+
     // Vector of ObjectData class from the Zed Api
     Objects objs;
+
+    // Objetcs that return the AI module.
+    CustomDetectedObjects custom_obj;
 
     // Initialize API
     API api(obj_mutex, objs);

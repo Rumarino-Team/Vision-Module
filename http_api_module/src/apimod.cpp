@@ -3,7 +3,7 @@
  * In here we will change what the API return
  **/
 using json = nlohmann::json;
-API::API(std::mutex &obj_mutex, Objects &ai_objects) : mtx(obj_mutex), objs(ai_objects) {
+API::API(std::mutex &obj_mutex, sl::Objects &ai_objects) : mtx(obj_mutex), objs(ai_objects) {
     this->init();
 }
 
@@ -24,21 +24,24 @@ void API::init() {
         lock.unlock();
         json out;
         std::vector<json> objs_list;
-        for (const DetectedObject &obj : obj_cpy) {
+        for (const sl::Objects &obj : obj_cpy) {
+            float distance = std::sqrt(position[0]*obj.position[0] + obj.position[1]*obj.position[1] + obj.position[2]*obj.position[2]);
             json obj_json {
                     {"bounding_box", {
-                        {"x", obj.bounding_box.x},
-                        {"y", obj.bounding_box.y},
-                        {"w", obj.bounding_box.width},
-                        {"h", obj.bounding_box.height}
+                        {"A", obj.bounding_box[0]},
+                        {"B", obj.bounding_box_2d[1]},
+                        {"C", obj.bounding_box_2d[2]},
+                        {"D", obj.bounding_box_2d[3]}
                     }},
+                    {"label", obj.label},
+                    {"raw_label", obj.raw_label},
                     {"id", obj.id},
-                    {"name", obj.name},
-                    {"distance", std::to_string(obj.distance)},
+                    {"distance", std::to_string(distance)},
+                    {"confidence", std::to_string(obj.confidence)},
                     {"location", {
-                        {"x", std::to_string(obj.location.x)},
-                        {"y", std::to_string(obj.location.y)},
-                        {"z", std::to_string(obj.location.z)}
+                        {"x", std::to_string(obj.position[0])},
+                        {"y", std::to_string(obj.position[1])},
+                        {"z", std::to_string(obj.position[2])}
                     }}
             };
 

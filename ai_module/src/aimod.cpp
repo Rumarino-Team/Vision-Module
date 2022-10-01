@@ -66,8 +66,8 @@ sl::CustomBoxObjectData AI::detect_objects(std::vector<cv::Mat> &frames) {
 
         // Fill the detections into the correct SDK format
         tmp.unique_object_id = sl::generate_unique_id();
-        tmp.probability = prediction.conf;
-        tmp.label = (int) prediction.class_id;
+        tmp.probability = prediction.prop;
+        tmp.label = (int) prediction.class;
         tmp.bounding_box_2d = bbox_out;
         tmp.is_grounded = true; // objects are moving on the floor plane and tracked in 2D only
         objects_in.push_back(tmp);
@@ -82,10 +82,10 @@ sl::CustomBoxObjectData AI::detect_objects(std::vector<cv::Mat> &frames) {
     return results;
 }
 
-DetectedObjects AI::detect(cv::Mat &frame) {
+DetectedObjects AI::detect(Video &frame) {
     // Inference need a Vector type.
     auto vect = std::vector<cv::Mat>;
-    vect.push_back(frame);
+    vect.push_back(frame.image);
     return this->detect_objects(vect);
 }
 
