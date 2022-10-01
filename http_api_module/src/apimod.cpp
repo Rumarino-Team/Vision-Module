@@ -1,6 +1,9 @@
 #include "httpapimod/apimod.hpp"
+/**
+ * In here we will change what the API return
+ **/
 using json = nlohmann::json;
-API::API(std::mutex &obj_mutex, DetectedObjects &ai_objects) : mtx(obj_mutex), objs(ai_objects) {
+API::API(std::mutex &obj_mutex, Objects &ai_objects) : mtx(obj_mutex), objs(ai_objects) {
     this->init();
 }
 
@@ -17,7 +20,7 @@ void API::init() {
         //TODO: If variable hasn't updated then keep the old json
         std::unique_lock<std::mutex> lock(mtx);
         //Copy the array to prevent stopping the AI thread
-        DetectedObjects obj_cpy = objs;
+        Objects obj_cpy = objs;
         lock.unlock();
         json out;
         std::vector<json> objs_list;

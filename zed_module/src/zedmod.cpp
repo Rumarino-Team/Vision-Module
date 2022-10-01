@@ -122,9 +122,37 @@ void ZED_Camera::init(bool record, const std::string &playback_video, const std:
     sl::InitParameters init_params;
     init_params.sdk_verbose = true; // Use for the debug flag.
     // Init depth sensing
-    init_params.depth_mode = sl::DEPTH_MODE::ULTRA;
+    init_params.depth_mode = sl::DEPTH_MODE::Neural;
     init_params.coordinate_units = sl::UNIT::METER;
     init_params.depth_stabilization = true;
+
+
+        // Set the other initialization parameters
+    ObjectDetectionParameters detection_parameters;
+    detection_parameters.detection_model = DETECTION_MODEL::CUSTOM_BOX_OBJECTS; // Mandatory for this mode
+    detection_parameters.enable_tracking = true; // Objects will keep the same ID between frames
+    detection_parameters.enable_mask_output = true; // Outputs 2D masks over detected objects
+
+
+    ObjectDetectionRuntimeParameters detection_parameters_rt;
+    detection_parameters_rt.detection_confidence_threshold = 60;
+
+    if (detection_parameters.enable_tracking) {
+    // Set positional tracking parameters
+    PositionalTrackingParameters positional_tracking_parameters;
+    // Enable positional tracking
+    zed.enablePositionalTracking(positional_tracking_parameters);
+}
+
+        // Enable object detection with initialization parameters
+    zed_error = zed.enableObjectDetection(detection_parameters);
+    if (zed_error != ERROR_CODE::SUCCESS) {
+        cout << "enableObjectDetection: " << zed_error << "\nExit program.";
+        zed.close();
+        exit(-1);
+    }
+
+    
 
     // Choose either opening a camera stream or video stream
     if (playback_video.empty()) {
@@ -159,6 +187,13 @@ void ZED_Camera::init(bool record, const std::string &playback_video, const std:
 }
 
 ZED_Camera::~ZED_Camera() { this->close(); }
+
+Objects ZED_Camera::Zed_Inference(CustomBoxObjectData &CustomObject){
+    Objects objects;
+    zed.ingestCustomBoxObjects(CustomObject);
+    zed.retrieveObjects(objects, detection_parameters_rt);
+    return objects;
+}
 
 Video_Frame ZED_Camera::update() {
     Video_Frame new_frame;

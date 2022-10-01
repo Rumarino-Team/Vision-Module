@@ -68,6 +68,8 @@ class ZED_Camera {
         sl::Camera zed;
         // Recording state
         bool recording;
+
+        
         // Actually initiates the object
         void init(bool record, const std::string &playback_video, const std::string &recording_out, sl::RESOLUTION res, int fps);
     public:
@@ -102,6 +104,8 @@ class ZED_Camera {
          */
         ZED_Camera(const std::string &playback_video);
 
+
+
         /**
          * Will just call the cameras destructor and call close()
          */
@@ -113,6 +117,9 @@ class ZED_Camera {
          * @returns The current frame information: Left camera image, depth map and point cloud
          */
         Video_Frame update();
+
+
+        sl::Objects Zed_Inference(sl::CustomBoxObjectData objs);
 
         /*
          * Closes the video stream and recording

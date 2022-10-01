@@ -28,7 +28,7 @@ void camera_stream(ZED_Camera &cam, Video_Frame &frame, std::atomic<bool> &runni
     cam.close();
 }
 
-void ai_stream(AI &ai, float confidence, DetectedObjects &objs, Video_Frame &frame, std::atomic<bool> &running) {
+void ai_stream(AI &ai, DetectedObjects &objs, Video_Frame &frame, std::atomic<bool> &running, Zec_Camera & cam) {
     // Stop the thread properly
     while (running) {
         // Handle new frame
@@ -40,7 +40,10 @@ void ai_stream(AI &ai, float confidence, DetectedObjects &objs, Video_Frame &fra
 
         // Handle new object
         std::unique_lock<std::mutex> obj_lock(obj_mutex);
-        objs = ai.detect(frame_copy, confidence);
+        objs = ai.detect(frame_copy);
+        objs = cam.Zed_Inference(objs)
+
+
         new_obj.notify_one();
         obj_lock.unlock();
     }
@@ -121,6 +124,8 @@ int main(int argc, const char* argv[]) {
             live_zed = false;
             z_in = argv[++i];
         }
+        // In the Yolo model  we are going to pass the yaml file that contains the 
+        // directories of the weights, model and classifications.
         else if (arg == "-m" || arg == "--yolo_model") {
             model = argv[++i];
         }
@@ -131,6 +136,7 @@ int main(int argc, const char* argv[]) {
         else if (arg == "-mfps" || arg == "--model_fps") {
             m_fps = std::stoi(std::string(argv[++i]));
         }
+        // Current detector does not make treshold of confidence level.
         else if (arg == "-c" || arg == "--confidence") {
             confidence_percent = std::stoi(std::string(argv[++i]));
         }
@@ -143,7 +149,7 @@ int main(int argc, const char* argv[]) {
     }
 
     if(model.empty()) {
-        std::cout << "No YOLO model specified!" << std::endl;
+        std::cout << "No yaml file of Yolo model specified!" << std::endl;
         return 0;
     }
 
@@ -160,8 +166,9 @@ int main(int argc, const char* argv[]) {
 
     // Initialize AI
     AI ai(model, m_record, m_out, m_fps);
-    DetectedObjects objs;
     float conf = float(confidence_percent) / 100;
+    // Vector of ObjectData class from the Zed Api
+    Objects objs;
 
     // Initialize API
     API api(obj_mutex, objs);
@@ -171,7 +178,7 @@ int main(int argc, const char* argv[]) {
 
     // Since threads copy arguments we must pass them by reference.
     std::thread camera_thread(camera_stream, std::ref(cam), std::ref(frame), std::ref(running));
-    std::thread ai_thread(ai_stream, std::ref(ai), conf, std::ref(objs), std::ref(frame), std::ref(running));
+    std::thread ai_thread(ai_stream, std::ref(ai), conf, std::ref(objs), std::ref(frame), std::ref(running), std::ref(cam), std::ref(customs_obj));
 
     api.start(ip, port);
     running = false;
