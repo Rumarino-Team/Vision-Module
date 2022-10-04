@@ -122,7 +122,7 @@ void ZED_Camera::init(bool record, const std::string &playback_video, const std:
     sl::InitParameters init_params;
     init_params.sdk_verbose = true; // Use for the debug flag.
     // Init depth sensing
-    init_params.depth_mode = sl::DEPTH_MODE::Neural;
+    init_params.depth_mode = sl::DEPTH_MODE::ULTRA;
     init_params.coordinate_units = sl::UNIT::METER;
     init_params.depth_stabilization = true;
 

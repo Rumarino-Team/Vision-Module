@@ -2,8 +2,7 @@
 //TODO: Implement DrawInference method. To Do that we have to do an Override to the function by creating a class
 // that inherit the Yolov7 Model. This is just for eliminating the cv::imwrite function.
 
-     Yolov7::DrawResults(const std::vector<DetectRes> &detections, std::vector<cv::Mat> vec_img,
-                            std::vector<std::string> image_name=std::vector<std::string>()) {
+     Yolov7::DrawResults(const std::vector<DetectRes> &detections, std::vector<cv::Mat> vec_img) {
         org_img = vec_img;
         std::vector<Bbox> rects = detections.det_results;
         if (channel_order == "BGR")
@@ -75,14 +74,14 @@ sl::CustomBoxObjectData AI::detect_objects(std::vector<cv::Mat> &frames) {
 
     // Add the new frame annotated to the Video.   
     if(recording){
-        annotated_img = yolov7->DrawResults();
+        annotated_img = yolov7->DrawResults(predictions, frames);
         out_vid.write(annotated_img);
     }
 
     return results;
 }
 
-DetectedObjects AI::detect(Video &frame) {
+ sl::CustomBoxObjectData AI::detect(Video &frame) {
     // Inference need a Vector type.
     auto vect = std::vector<cv::Mat>;
     vect.push_back(frame.image);

@@ -15,16 +15,16 @@ void API::init() {
     server.Get("/online", [](const httplib::Request& req, httplib::Response& res) {
         res.set_content("Yes", "text/plain");
     });
-
+// TODO: Representing Matrices as Json. This is for giving out the Mask propertie.
     server.Get("/detected_objects", [this](const httplib::Request& req, httplib::Response& res) {
         //TODO: If variable hasn't updated then keep the old json
         std::unique_lock<std::mutex> lock(mtx);
         //Copy the array to prevent stopping the AI thread
-        Objects obj_cpy = objs;
+        sl::Objects obj_cpy = objs.object_list;
         lock.unlock();
         json out;
         std::vector<json> objs_list;
-        for (const sl::Objects &obj : obj_cpy) {
+        for (const sl::Objects &obj : obj_cpy.object_list) {
             float distance = std::sqrt(position[0]*obj.position[0] + obj.position[1]*obj.position[1] + obj.position[2]*obj.position[2]);
             json obj_json {
                     {"bounding_box", {
@@ -33,6 +33,7 @@ void API::init() {
                         {"C", obj.bounding_box_2d[2]},
                         {"D", obj.bounding_box_2d[3]}
                     }},
+                    {"mask"}
                     {"label", obj.label},
                     {"raw_label", obj.raw_label},
                     {"id", obj.id},
