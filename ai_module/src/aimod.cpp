@@ -1,9 +1,7 @@
 #include "aimod/aimod.hpp"
-//TODO: Implement DrawInference method. To Do that we have to do an Override to the function by creating a class
-// that inherit the Yolov7 Model. This is just for eliminating the cv::imwrite function.
 
      Yolov7::DrawResults(const std::vector<DetectRes> &detections, std::vector<cv::Mat> vec_img) {
-        org_img = vec_img;
+        std::vector<cv::Mat> org_img = vec_img;
         std::vector<Bbox> rects = detections.det_results;
         if (channel_order == "BGR")
             cv::cvtColor(org_img, org_img, cv::COLOR_BGR2RGB);
@@ -30,7 +28,10 @@ AI::AI(std::string input_yaml, bool record, std::string output_path, int fps) {
         std::cout << "File extension is not yaml." std::endl;
     }
     // Load yolov7
-    Yolov7 yolov7 = new Yolov7(input_yaml);
+    // The YAML::LoadFile function is already imported when using the Yolov7 detector.
+    YAML::Node root = YAML::LoadFile(input_yaml);
+    Yolov7 yolov7 = new Yolov7(root["yolov7"]);
+    YOLOv7.LoadEngine();
 
     if(recording) {
         //Start the CV Video Writer
@@ -72,7 +73,7 @@ sl::CustomBoxObjectData AI::detect_objects(std::vector<cv::Mat> &frames) {
         objects_in.push_back(tmp);
 
 
-    // Add the new frame annotated to the Video.   
+    // Add the new annotated frame to the video.   
     if(recording){
         annotated_img = yolov7->DrawResults(predictions, frames);
         out_vid.write(annotated_img);
@@ -82,7 +83,8 @@ sl::CustomBoxObjectData AI::detect_objects(std::vector<cv::Mat> &frames) {
 }
 
  sl::CustomBoxObjectData AI::detect(Video &frame) {
-    // Inference need a Vector type.
+    // Inference need to be a Vector type. So we are creating
+    // a vector with a single element.
     auto vect = std::vector<cv::Mat>;
     vect.push_back(frame.image);
     return this->detect_objects(vect);

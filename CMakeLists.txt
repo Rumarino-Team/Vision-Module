@@ -22,8 +22,22 @@ link_directories(${CUDA_LIBRARY_DIRS})
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INLCUDE_DIRS})
 
+# TensorRT
+set(TENSORRT_ROOT /usr/src/tensorrt/)
+find_path(TENSORRT_INCLUDE_DIR NvInfer.h
+        HINTS ${TENSORRT_ROOT} PATH_SUFFIXES include/)
+message(STATUS "Found TensorRT headers at ${TENSORRT_INCLUDE_DIR}")
+
+set(MODEL_INCLUDE ../code/includes)
+set(MODEL_LIB_DIR libs)
+set(YAML_INCLUDE ../depends/yaml-cpp/include)
+set(YAML_LIB_DIR ../depends/yaml-cpp/libs)
+
+include_directories(${MODEL_INCLUDE} ${YAML_INCLUDE})
+link_directories(${MODEL_LIB_DIR} ${YAML_LIB_DIR})
+
 # Setup Darknet libs
-find_library(DARKNET_LIBRARY NAMES dark libdark.so libdarknet.so)
+#find_library(DARKNET_LIBRARY NAMES dark libdark.so libdarknet.so)
 #find_package(dark REQUIRED)
 
 # Setup HTTP libs

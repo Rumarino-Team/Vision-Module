@@ -15,10 +15,8 @@ struct Video_Frame {
      * Initialize frame by copying the images
      *
      * @param image
-     * @param depth_map
-     * @param point_cloud
      */
-    Video_Frame(cv::Mat &image, cv::Mat &depth_map, cv::Mat &point_cloud);
+    Video_Frame(cv::Mat &image);
     /**
      * Initialize frame by copying another frame
      *
@@ -33,10 +31,6 @@ struct Video_Frame {
     void copy(Video_Frame &frame);
     // Original left camera frame
     cv::Mat image;
-    // Each pixel contains a float32 determining pixel distance
-    cv::Mat depth_map;
-    // Each pixel contains [x,y,z,NULL]
-    cv::Mat point_cloud;
 };
 
 /**
@@ -117,8 +111,10 @@ class ZED_Camera {
          * @returns The current frame information: Left camera image, depth map and point cloud
          */
         Video_Frame update();
-
-
+        /*
+        *This method return the Objects vector of the ObjectData type from the Zed SDK in the
+        * Object detection AI module.
+        */
         sl::Objects Zed_Inference(sl::CustomBoxObjectData objs);
 
         /*

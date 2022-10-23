@@ -124,7 +124,7 @@ int main(int argc, const char* argv[]) {
         }
         // In the Yolo model  we are going to pass the yaml file that contains the 
         // directories of the weights, model and classifications.
-        else if (arg == "-m" || arg == "--yolo_model") {
+        else if (arg == "-y" || arg == "--yaml-file") {
             model = argv[++i];
         }
         else if (arg == "-mr" || arg == "--model_record") {
@@ -155,9 +155,9 @@ int main(int argc, const char* argv[]) {
     // Initialize ZED Cam
     std::shared_ptr<ZED_Camera> cam_ptr;
     if (live_zed) {
-        cam_ptr.reset(new ZED_Camera(z_record, z_res, z_fps, z_out));
+        cam_ptr.reset(new ZED_Camera(z_record, z_res, z_fps, z_out, confidence_percent));
     } else {
-        cam_ptr.reset(new ZED_Camera(z_in));
+        cam_ptr.reset(new ZED_Camera(z_in, confidence_percent));
     }
 
     ZED_Camera& cam = *cam_ptr;
