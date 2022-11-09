@@ -21,6 +21,9 @@ link_directories(${CUDA_LIBRARY_DIRS})
 # Setup OpenCV libs
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INLCUDE_DIRS})
+# Check if OpenMP is installed 
+find_package(OpenMP)
+checkPackage("OpenMP" "OpenMP not found, please install it to improve performances: 'sudo apt install libomp-dev'")
 
 # TensorRT
 set(TENSORRT_ROOT /usr/src/tensorrt/)

@@ -43,7 +43,7 @@ sl::CustomBoxObjectData AI::detect_objects(std::vector<cv::Mat> &frames) {
     //
     sl::CustomBoxObjectData results;
 
-    // Image where detected structures are written in
+    
     cv::Mat annotated_img;
     if(recording)
         cv::cvtColor(frame, annotated_img, cv::COLOR_BGRA2BGR);
