@@ -72,14 +72,14 @@ git clone https://github.com/linghu8812/tensorrt_inference.git
 ```
 
 Then compile and copy the files over to local
+
 ```bash
 cd tensorrt_inference/project
 mkdir build && cd build
 cmake ..
 make -j
-make -j5
-sudo cp libdarknet.so /usr/local/lib
-sudo cp include/yolo_v2_class.hpp /usr/local/include
+mkdir libs build
+cp ../bin/libyolov7.so ./libs/
 ```
 
 ## Setting up the API dependencies
