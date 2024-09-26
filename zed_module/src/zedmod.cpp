@@ -71,10 +71,8 @@ const char* ErrorToString(sl::ERROR_CODE error) {
 
 Video_Frame::Video_Frame() = default;
 
-Video_Frame::Video_Frame(cv::Mat &image, cv::Mat &depth_map, cv::Mat &point_cloud) {
+Video_Frame::Video_Frame(cv::Mat &image) {
     this->image = image;
-    this->depth_map = depth_map;
-    this->point_cloud = point_cloud;
 }
 
 Video_Frame::Video_Frame(Video_Frame &frame) {
@@ -83,11 +81,9 @@ Video_Frame::Video_Frame(Video_Frame &frame) {
 
 void Video_Frame::copy(Video_Frame &frame) {
     image = frame.image.clone();
-    depth_map = frame.depth_map.clone();
-    point_cloud = frame.point_cloud.clone();
 }
 
-ZED_Camera::ZED_Camera(bool record, const std::string &recording_out, Video_Quality quality) {
+ZED_Camera::ZED_Camera(bool record, const std::string &recording_out, Video_Quality quality, float confidence_percent) {
     sl::RESOLUTION res;
     int fps;
 
@@ -104,11 +100,11 @@ ZED_Camera::ZED_Camera(bool record, const std::string &recording_out, Video_Qual
         case Video_Quality::VGA_100fps: res = sl::RESOLUTION::VGA; fps=100; break;
     }
 
-    this->init(record, std::string(), recording_out, res, fps);
+    this->init(record, std::string(), recording_out, res, fps, confidence_percent);
 }
 
-ZED_Camera::ZED_Camera(bool record, sl::RESOLUTION res, int fps, const std::string &recording_out) {
-    this->init(record, empty, recording_out, res, fps);
+ZED_Camera::ZED_Camera(bool record, sl::RESOLUTION res, int fps, const std::string &recording_out, float confidence_percent) {
+    this->init(record, empty, recording_out, res, fps, confidence_percent);
 }
 
 ZED_Camera::ZED_Camera(const std::string &playback_video) {
@@ -122,9 +118,37 @@ void ZED_Camera::init(bool record, const std::string &playback_video, const std:
     sl::InitParameters init_params;
     init_params.sdk_verbose = true; // Use for the debug flag.
     // Init depth sensing
-    init_params.depth_mode = sl::DEPTH_MODE::ULTRA;
+    init_params.depth_mode = sl::DEPTH_MODE::Neural;
     init_params.coordinate_units = sl::UNIT::METER;
     init_params.depth_stabilization = true;
+
+
+        // Set the other initialization parameters
+    ObjectDetectionParameters detection_parameters;
+    detection_parameters.detection_model = DETECTION_MODEL::CUSTOM_BOX_OBJECTS; // Mandatory for this mode
+    detection_parameters.enable_tracking = true; // Objects will keep the same ID between frames
+    detection_parameters.enable_mask_output = true; // Outputs 2D masks over detected objects
+
+
+    ObjectDetectionRuntimeParameters detection_parameters_rt;
+    detection_parameters_rt.detection_confidence_threshold = confidence_percent;
+
+    if (detection_parameters.enable_tracking) {
+    // Set positional tracking parameters
+    PositionalTrackingParameters positional_tracking_parameters;
+    // Enable positional tracking
+    zed.enablePositionalTracking(positional_tracking_parameters);
+}
+
+        // Enable object detection with initialization parameters
+    zed_error = zed.enableObjectDetection(detection_parameters);
+    if (zed_error != ERROR_CODE::SUCCESS) {
+        cout << "enableObjectDetection: " << zed_error << "\nExit program.";
+        zed.close();
+        exit(-1);
+    }
+
+    
 
     // Choose either opening a camera stream or video stream
     if (playback_video.empty()) {
@@ -160,6 +184,14 @@ void ZED_Camera::init(bool record, const std::string &playback_video, const std:
 
 ZED_Camera::~ZED_Camera() { this->close(); }
 
+
+sl::Objects ZED_Camera::Zed_Inference(CustomBoxObjectData &CustomObject){
+    sl::Objects objects;
+    zed.ingestCustomBoxObjects(CustomObject);
+    zed.retrieveObjects(objects, detection_parameters_rt);
+    return objects;
+}
+
 Video_Frame ZED_Camera::update() {
     Video_Frame new_frame;
     sl::Mat left_image, depth_map, point_cloud;
@@ -181,6 +213,7 @@ Video_Frame ZED_Camera::update() {
 
     return new_frame;
 }
+
 
 void ZED_Camera::close() {
     if (recording) {

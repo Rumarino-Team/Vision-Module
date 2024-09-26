@@ -4,13 +4,18 @@ In order to successfully run the program you will need to install the following;
 1. CUDA
 2. OpenCV
 3. ZED SDK
-4. Darknet
-5. cpp-httplib
-6. nlohmann's json
+4. YAML-cpp
+5. TensorRT Inference Model
+6. cpp-httplib
+7. nlohmann's json
 
 ## Setting up CUDA
 
-If using POP OS:
+Cuda is a parallel computing platform created for certain Nvidia GPU's that set an enviroment for
+optimizing the computing process of the machine. This module will be running behind the scenes in the following modules:
+Zed SDK, TensorRT and OpenCV. Without a proper machine that can run this framework the module will not run.
+
+If using POP OS you can install it with:
 ```
 sudo apt-get install system76-cuda-latest system76-cudnn-10.2
 ```
@@ -20,30 +25,61 @@ On any other linux distributions:
 [Install CUDNN for CUDA 10.2](https://docs.nvidia.com/deeplearning/cudnn/install-guide/index.html)
 
 ## Setting up OpenCV
-
+OpenCV is the framework that is used for modifying the Images.
 In the tools folder there is an included opencvsetup script with everything setup for you:
 ```
 ./tools/opencvSetup
 ```
+You will only need to execute the file in the bash and it will dowload the dependencies.
 
 ## Setting up ZED SDK
+
+This is the core of the module. This module will let us connect with the camera and extract
+all the information that we will need.
 
 Head over to the [StereoLabs](https://www.stereolabs.com/developers/release/) website 
 and install ZED SDK for CUDA 10.2 and follow the instructions given in 
 their [docs](https://www.stereolabs.com/docs/installation/linux/)
 
-## Setting up Darknet
-
-First clone [This Darknet repo](https://github.com/FloppyDisck/darknet)
+## YAML-Cpp
+This dependencie is neccesary for reading the YAML file that will be passed
+to the TensorRT Inference model.
+First you can Dowload the repo from here.
 ```bash
-git clone https://github.com/FloppyDisck/darknet.git
+git clone https://github.com/jbeder/yaml-cpp.git
+```
+Then compile it with cmake.
+```bash
+mkdir build && cd build
+cmake ..
+make -j
+```
+
+## Setting up TensorRT Yolo Inference model
+
+This is the Inference model that we are gonna used for making the detections.
+We will using the Yolov7 Detector from this repo that has already make the wrapper of the onnx
+model for us. Please revise the [example](https://github.com/linghu8812/tensorrt_inference/tree/master/example) project from the repo. Don't worry if the example is using
+the yolov5 model the code for both model are the same(What change is the onnx model previous trained).
+
+**Important**: The model also need the TensorRT package for it to work but if you have installed all previous
+ dependencies correcty when installing the Zed SDK it must have already install this package.
+
+
+First clone this [TensorRT repo](https://github.com/linghu8812/tensorrt_inference)
+```bash
+git clone https://github.com/linghu8812/tensorrt_inference.git
 ```
 
 Then compile and copy the files over to local
+
 ```bash
-make -j5
-sudo cp libdarknet.so /usr/local/lib
-sudo cp include/yolo_v2_class.hpp /usr/local/include
+cd tensorrt_inference/project
+mkdir build && cd build
+cmake ..
+make -j
+mkdir libs build
+cp ../bin/libyolov7.so ./libs/
 ```
 
 ## Setting up the API dependencies
@@ -124,8 +160,8 @@ The following are for pre-recorded feeds
 [-zp, --zed_play] ${SVO_file}
 ```
 
-#### Darknet parameters
-The only parameter that is required is the yolo_model flag. The rest are optional.
+#### Yolov7 parameters
+The only parameter that is required is the yaml file flag. The rest are optional.
 
 ```bash
 # Required parameter that points to the pre-trained model folder

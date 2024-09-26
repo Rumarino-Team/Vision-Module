@@ -8,7 +8,7 @@
 
 class API {
 public:
-    API(std::mutex &obj_mutex, DetectedObjects &ai_objects);
+    API(std::mutex &obj_mutex, sl::Objects &ai_objects);
     void start(const char* ip, int port);
 private:
     void init();

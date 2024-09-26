@@ -1,86 +1,69 @@
 #ifndef __AI_MODULE__
 #define __AI_MODULE__
-#include <experimental/filesystem>
-#include <yolo_v2_class.hpp>
+#include <filesystem>
 #include <opencv2/opencv.hpp>
-#include "zedmod/zedmod.hpp"
 
-/**
- * Contains all object information
- */
-struct DetectedObject {
-    // The location of the object in relation to the image
-    cv::Rect bounding_box;
-    // The object id according to the object detector
-    int id;
-    // The object name that matches with the given id
-    const char* name;
-    // The distance from the camera
-    float distance;
-    // The relative 3D location from the camera
-    cv::Point3f location;
-};
+// We have to include the Zed module
+#include <"zedmod/zedmod.hpp">
 
-/**
- * Is just an array containing many DetectedObject objects
- */
-using DetectedObjects = std::vector<DetectedObject>;
+// This is the file from the Detector of Yolov7
+#include<"yolov7.h">
 
-/**
- * Object Detection and Segmentation wrapper
- */
+
+// This variable is used for storing the CustomDetectedObjects that
+// is transfer to the zed.ingestinference(). This vector is updated
+// every grab of the camera.
+using CustomDetectedObjects = std::vector<CustomBoxObjectData>;
+
+
+// We created a new Class that inherits from the yolov7 detector to redifined
+// the method DrawResults.
+class Yolov7 : yolov7{
+public:
+void DrawResults(const std::vector<ClassRes> &results, std::vector<cv::Mat> &vec_img,
+                     std::vector<std::string> image_names);
+
+}
+
+
 class AI {
     private:
         // Recording state
         bool recording;
-        // The object names
-        std::vector<std::string> names;
         // The output video
         cv::VideoWriter out_vid;
-        // The initialized darknet detector
-        Detector* darknet;
+        // The initialized Yolov7 detector
+        yolov7* Yolov7;
 
         /**
-         * Internal method for detecting objects from an image using darknet.</>Used by the detect() methods.
+         * Internal method for detecting objects from an image using yolov7.
          *
          * @param frame The input image
-         * @param minimum_confidence Minimum object confidence
          * @return DetectedObjects where each DetectedObject only contains bounding_box, id and name
          */
-        DetectedObjects detect_objects(cv::Mat &frame, float minimum_confidence); //Detects the object
+        CustomBoxObjectData detect_objects(cv::Mat &frame); //Detects the object
 public:
         /**
          * Reads all the YOLO files and initializes the model.</> It also starts the recording.
          *
-         * @param input_path The pre-trained YOLO model folder
+         * @param input_yaml The yaml config
          * @param record Whether to record the stream or not
          * @param output_path Name of the video to be saved if recording
          * @param fps The framerate at which the video playback would be at.
          */
-        AI(std::string input_path, bool record=false, std::string output_path=empty, int fps=15);
+        AI(std::string input_yaml, bool record=false, std::string output_path=empty, int fps=15);
 
         /**
          * Calls the destructor and the close() method
          */
         ~AI();
-
-        /**
-         * Detects objects and gives their approximate distance and 3D location.
-         *
-         * @param frame The input frame
-         * @param minimum_confidence Minimum object confidence
-         * @return Detected objects and with location in relation to the image and 3D space in relation to the camera, object distance, name and id.
-         */
-        DetectedObjects detect(Video_Frame &frame, float minimum_confidence);
-
         /**
          * Detects objects.
          *
          * @param frame The input image
-         * @param minimum_confidence Minimum object confidence
-         * @return DetectedObjects where each DetectedObject only contains bounding_box, id and name
+         * @return CustomBoxObjectData where each DetectedObject only contains bounding_box, id and name
          */
-        DetectedObjects detect(cv::Mat &frame, float minimum_confidence);
+        CustomBoxObjectData detect(Video_Frame &frame);
 
         /*
          * Closes the AI, and if recording, closes the camera stream.

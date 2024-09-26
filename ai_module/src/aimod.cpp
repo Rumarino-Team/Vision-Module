@@ -1,115 +1,93 @@
 #include "aimod/aimod.hpp"
 
-AI::AI(std::string input_path, bool record, std::string output_path, int fps) {
+     Yolov7::DrawResults(const std::vector<DetectRes> &detections, std::vector<cv::Mat> vec_img) {
+        std::vector<cv::Mat> org_img = vec_img;
+        std::vector<Bbox> rects = detections.det_results;
+        if (channel_order == "BGR")
+            cv::cvtColor(org_img, org_img, cv::COLOR_BGR2RGB);
+        for(const auto &rect : rects) {
+            char t[256];
+            sprintf(t, "%.2f", rect.prob);
+            std::string name = class_labels[rect.classes] + "-" + t;
+            cv::putText(org_img, name, cv::Point(rect.x - rect.w / 2, rect.y - rect.h / 2 - 5),
+                    cv::FONT_HERSHEY_COMPLEX, 0.7, class_colors[rect.classes], 2);
+            cv::Rect rst(rect.x - rect.w / 2, rect.y - rect.h / 2, rect.w, rect.h);
+            cv::rectangle(org_img, rst, class_colors[rect.classes], 2, cv::LINE_8, 0);
+        }
+        return org_img;
+        }
+    
+
+
+AI::AI(std::string input_yaml, bool record, std::string output_path, int fps) {
     //Set recording flag
     recording = record;
-
-    std::string cfg, weights, names_path;
-
-    //Identify the files inside the folder
-    for (const auto & entry : std::experimental::filesystem::directory_iterator(input_path)) {
-        if (entry.path().has_extension()) {
-            if (entry.path().extension().string() == ".cfg") {
-                cfg = entry.path().string();
-            }
-            else if (entry.path().extension().string() == ".names") {
-                names_path = entry.path().string();
-            }
-        }
-        else if (entry.path().stem().string() == "weights") {
-            for (const auto & all_weights : std::experimental::filesystem::directory_iterator(entry.path())) {
-                std::string weight_str = all_weights.path().stem();
-                //TODO: for now we only look for the best weights, there must be a better way
-                if (weight_str.substr(weight_str.length() - 5) == "_best") {
-                    weights = all_weights.path().string();
-                    break;
-                }
-            }
-        }
+    
+    // Check if the directory is a yaml document.
+    if(std::filesystem::path(input_yaml) != "yaml"){
+        std::cout << "File extension is not yaml." std::endl;
     }
-
-    //Get the names inside the file
-    std::ifstream names_file;
-    names_file.open(names_path.c_str());
-    if(!names_file) {
-        std::cout << "[AI] [ERROR] No .nammes file found";
-    }
-    else {
-        std::string name;
-        while(!names_file.eof()) {
-            getline(names_file, name);
-            names.push_back(name);
-        }
-    }
-
-    // Load darknet
-    darknet = new Detector(cfg, weights);
+    // Load yolov7
+    // The YAML::LoadFile function is already imported when using the Yolov7 detector.
+    YAML::Node root = YAML::LoadFile(input_yaml);
+    Yolov7 yolov7 = new Yolov7(root["yolov7"]);
+    YOLOv7.LoadEngine();
 
     if(recording) {
         //Start the CV Video Writer
         out_vid = cv::VideoWriter(output_path, cv::VideoWriter::fourcc('M','P','E','G'), fps, cv::Size(1920, 1080));
     }
 }
+// All function that return DetectedObjects now will return CustomobjectData
+sl::CustomBoxObjectData AI::detect_objects(std::vector<cv::Mat> &frames) {
+    //
+    sl::CustomBoxObjectData results;
 
-DetectedObjects AI::detect_objects(cv::Mat &frame, float minimum_confidence) {
-    //Create the resulting struct
-    DetectedObjects results;
-
-    // Image where detected structures are written in
+    
     cv::Mat annotated_img;
     if(recording)
         cv::cvtColor(frame, annotated_img, cv::COLOR_BGRA2BGR);
 
-    //Predict items from the frame
-    auto predictions = darknet->detect(frame, minimum_confidence);
+    //Predict items from the frames
+    std::vector<DetectRes> predictions = yolov7->InferenceImages(frames);
+    for(Bbox &prediction : predictions.det_results) {
+        cv::Rect bounding_box = cv::Rect(prediction.x, prediction.y, prediction.w, prediction.h);
 
-    for(auto &prediction : predictions) {
-        DetectedObject result;
+        //Create the CustomBoxObjectData
+        sl::CustomBoxObjectData tmp;
 
-        result.bounding_box = cv::Rect(prediction.x, prediction.y, prediction.w, prediction.h);
-        result.id = prediction.obj_id;
-        // Get the name of the detected object; leave it empty if not found
-        if (prediction.obj_id < names.size()) {
-            result.name = names[prediction.obj_id].c_str();
-        }
-        else {
-            result.name = "";
-        }
+        //Setting the Bounding box info
+        std::vector<sl::uint2> bbox_out(4);
+        bbox_out[0] = sl::uint2(prediction.x, prediction.y);
+        bbox_out[1] = sl::uint2(prediction.x + predition.width, prediction.y);
+        bbox_out[2] = sl::uint2(prediction.x + prediction.width, prediction.y + prediction.height);
+        bbox_out[3] = sl::uint2(prediction.x, prediction.y + prediction.height);
 
-        if(recording)
-            cv::rectangle(annotated_img, result.bounding_box, cv::Scalar(0,255,0), 4, 8, 0);
 
-        results.push_back(result);
-    }
+        // Fill the detections into the correct SDK format
+        tmp.unique_object_id = sl::generate_unique_id();
+        tmp.probability = prediction.prop;
+        tmp.label = (int) prediction.class;
+        tmp.bounding_box_2d = bbox_out;
+        tmp.is_grounded = true; // objects are moving on the floor plane and tracked in 2D only
+        objects_in.push_back(tmp);
 
+
+    // Add the new annotated frame to the video.   
     if(recording){
+        annotated_img = yolov7->DrawResults(predictions, frames);
         out_vid.write(annotated_img);
     }
 
     return results;
 }
 
-DetectedObjects AI::detect(Video_Frame &frame, float minimum_confidence) {
-    DetectedObjects results = this->detect_objects(frame.image, minimum_confidence);
-
-    //At the moment we have to iterate the same array twice for compatibility with the only image method
-    for (auto &result : results) {
-        //Get mid point from of the predicted image and get the distance from the depth image
-        //Float taken from depth map is distance in millimeters (mm)
-        cv::Point2f mid_point = cv::Point2f(result.bounding_box.x + result.bounding_box.width/2, result.bounding_box.y + result.bounding_box.height/2);
-        result.distance = frame.depth_map.at<float>(mid_point);
-
-        //Saving the 3D point on the struct
-        result.location.x = frame.point_cloud.at<cv::Vec4f>(mid_point)[0];
-        result.location.y = frame.point_cloud.at<cv::Vec4f>(mid_point)[1];
-        result.location.z = frame.point_cloud.at<cv::Vec4f>(mid_point)[2];
-    }
-
-    return results;
-}
-
-DetectedObjects AI::detect(cv::Mat &frame, float minimum_confidence) {
-    return this->detect_objects(frame, minimum_confidence);
+ sl::CustomBoxObjectData AI::detect(Video &frame) {
+    // Inference need to be a Vector type. So we are creating
+    // a vector with a single element.
+    auto vect = std::vector<cv::Mat>;
+    vect.push_back(frame.image);
+    return this->detect_objects(vect);
 }
 
 void AI::close() {
